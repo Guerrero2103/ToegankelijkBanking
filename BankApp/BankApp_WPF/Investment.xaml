@@ -1,0 +1,448 @@
+﻿<Window x:Class="BankApp_WPF.Investment"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Mijn Investeringen"
+        Height="950"
+        Width="1100"
+        Background="#000000"
+        WindowStartupLocation="CenterScreen">
+
+	<Grid Margin="30">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<!-- ========== HEADER ========== -->
+		<StackPanel Grid.Row="0" Margin="0,0,0,30">
+
+			<!-- Terug Knop -->
+			<Button x:Name="BackButtonTop"
+                    Height="60"
+                    Width="180"
+                    FontSize="20"
+                    FontWeight="Bold"
+                    Background="#FACC15"
+                    Foreground="Black"
+                    BorderBrush="#FACC15"
+                    BorderThickness="4"
+                    Cursor="Hand"
+                    HorizontalAlignment="Left"
+                    Margin="0,0,0,25">
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="←" FontSize="24" Margin="0,0,10,0"/>
+					<TextBlock Text="Terug" VerticalAlignment="Center"/>
+				</StackPanel>
+			</Button>
+
+			<!-- Pagina Titel -->
+			<TextBlock Text="Mijn Investeringen"
+                       FontSize="48"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       HorizontalAlignment="Left"/>
+		</StackPanel>
+
+		<!-- ========== SCROLLABLE CONTENT ========== -->
+		<ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+			<StackPanel MaxWidth="950" HorizontalAlignment="Center">
+
+				<!-- ========== PORTFOLIO OVERZICHT ========== -->
+				<Border Background="#16A34A"
+                        BorderBrush="#22C55E"
+                        BorderThickness="4"
+                        CornerRadius="12"
+                        Padding="35"
+                        Margin="0,0,0,30"
+                        Opacity="0.95">
+					<Border.Effect>
+						<DropShadowEffect Color="Black"
+                                        Direction="270"
+                                        ShadowDepth="6"
+                                        BlurRadius="20"
+                                        Opacity="0.7"/>
+					</Border.Effect>
+
+					<StackPanel>
+						<!-- Header -->
+						<StackPanel Orientation="Horizontal" Margin="0,0,0,25">
+							<Border Background="#22C55E"
+                                    Width="50"
+                                    Height="50"
+                                    CornerRadius="25"
+                                    Margin="0,0,15,0">
+								<TextBlock Text="📊"
+                                         FontSize="28"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"/>
+							</Border>
+							<TextBlock Text="Portfolio Overzicht"
+                                     FontSize="30"
+                                     FontWeight="Bold"
+                                     Foreground="White"
+                                     VerticalAlignment="Center"/>
+						</StackPanel>
+
+						<!-- Portfolio Info Box -->
+						<Border Background="#000000"
+                                BorderBrush="White"
+                                BorderThickness="2"
+                                CornerRadius="10"
+                                Padding="25"
+                                Opacity="0.4">
+							<StackPanel>
+								<!-- Totale Waarde -->
+								<TextBlock Text="Totale Waarde:"
+                                         FontSize="18"
+                                         FontWeight="SemiBold"
+                                         Foreground="#D1D5DB"
+                                         Margin="0,0,0,8"/>
+								<TextBlock Text="€ 19.905,50"
+                                         FontSize="50"
+                                         FontWeight="Bold"
+                                         Foreground="White"
+                                         FontFamily="Consolas"
+                                         Margin="0,0,0,25"/>
+
+								<!-- Totaal Geïnvesteerd -->
+								<TextBlock Text="Totaal Geïnvesteerd:"
+                                         FontSize="18"
+                                         FontWeight="SemiBold"
+                                         Foreground="#D1D5DB"
+                                         Margin="0,0,0,8"/>
+								<TextBlock Text="€ 19.200,00"
+                                         FontSize="36"
+                                         FontWeight="Bold"
+                                         Foreground="White"
+                                         FontFamily="Consolas"
+                                         Margin="0,0,0,25"/>
+
+								<!-- Totaal Rendement -->
+								<StackPanel Orientation="Horizontal">
+									<Border Background="#22C55E"
+                                            Width="60"
+                                            Height="60"
+                                            CornerRadius="30"
+                                            Margin="0,0,20,0"
+                                            VerticalAlignment="Center">
+										<TextBlock Text="📈"
+                                                 FontSize="32"
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center"/>
+									</Border>
+									<StackPanel>
+										<TextBlock Text="Totaal Rendement:"
+                                                 FontSize="18"
+                                                 FontWeight="SemiBold"
+                                                 Foreground="#D1D5DB"
+                                                 Margin="0,0,0,8"/>
+										<TextBlock FontSize="40"
+                                                 FontWeight="Bold"
+                                                 Foreground="#4ADE80">
+											<Run Text="€ 705,50"/>
+											<Run Text=" (+3,67%)" FontSize="32"/>
+										</TextBlock>
+									</StackPanel>
+								</StackPanel>
+							</StackPanel>
+						</Border>
+					</StackPanel>
+				</Border>
+
+				<!-- ========== MIJN POSITIES TITEL ========== -->
+				<StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+					<Border Background="#9333EA"
+                            Width="45"
+                            Height="45"
+                            CornerRadius="22"
+                            Margin="0,0,15,0">
+						<TextBlock Text="📊"
+                                 FontSize="24"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"/>
+					</Border>
+					<TextBlock Text="Mijn Posities"
+                             FontSize="36"
+                             FontWeight="Bold"
+                             Foreground="White"
+                             VerticalAlignment="Center"/>
+				</StackPanel>
+
+				<!-- ========== INVESTERING 1: APPLE ========== -->
+				<Border Background="#16A34A"
+                        BorderBrush="#22C55E"
+                        BorderThickness="4"
+                        CornerRadius="10"
+                        Padding="25"
+                        Margin="0,0,0,20"
+                        Opacity="0.15">
+					<Border.Effect>
+						<DropShadowEffect Color="Black"
+                                        Direction="270"
+                                        ShadowDepth="4"
+                                        BlurRadius="12"
+                                        Opacity="0.5"/>
+					</Border.Effect>
+
+					<StackPanel>
+						<!-- Header met naam en badges -->
+						<Grid Margin="0,0,0,20">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="Auto"/>
+							</Grid.ColumnDefinitions>
+
+							<StackPanel Grid.Column="0">
+								<TextBlock Text="Apple Inc."
+                                         FontSize="26"
+                                         FontWeight="Bold"
+                                         Foreground="White"
+                                         Margin="0,0,0,10"/>
+								<StackPanel Orientation="Horizontal">
+									<Border Background="#9333EA"
+                                            CornerRadius="6"
+                                            Padding="10,5"
+                                            Margin="0,0,8,0">
+										<TextBlock Text="Aandelen"
+                                                 FontSize="16"
+                                                 Foreground="White"/>
+									</Border>
+									<Border Background="#2563EB"
+                                            CornerRadius="6"
+                                            Padding="10,5">
+										<TextBlock Text="AAPL"
+                                                 FontSize="16"
+                                                 FontFamily="Consolas"
+                                                 Foreground="White"/>
+									</Border>
+								</StackPanel>
+							</StackPanel>
+
+							<Border Grid.Column="1"
+                                    Background="#22C55E"
+                                    Width="50"
+                                    Height="50"
+                                    CornerRadius="25">
+								<TextBlock Text="📈"
+                                         FontSize="28"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"/>
+							</Border>
+						</Grid>
+
+						<!-- Info Grid -->
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="10"/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="10"/>
+								<RowDefinition Height="Auto"/>
+							</Grid.RowDefinitions>
+
+							<!-- Huidige Waarde -->
+							<Border Grid.Column="0" Grid.Row="0"
+                                    Background="#000000"
+                                    BorderBrush="White"
+                                    BorderThickness="2"
+                                    CornerRadius="8"
+                                    Padding="15"
+                                    Opacity="0.4">
+								<StackPanel>
+									<TextBlock Text="Huidige Waarde:"
+                                             FontSize="16"
+                                             Foreground="#D1D5DB"
+                                             Margin="0,0,0,5"/>
+									<TextBlock Text="€ 4.462,50"
+                                             FontSize="28"
+                                             FontWeight="Bold"
+                                             Foreground="White"
+                                             FontFamily="Consolas"/>
+								</StackPanel>
+							</Border>
+
+							<!-- Geïnvesteerd -->
+							<Border Grid.Column="2" Grid.Row="0"
+                                    Background="#000000"
+                                    BorderBrush="White"
+                                    BorderThickness="2"
+                                    CornerRadius="8"
+                                    Padding="15"
+                                    Opacity="0.4">
+								<StackPanel>
+									<TextBlock Text="Geïnvesteerd:"
+                                             FontSize="16"
+                                             Foreground="#D1D5DB"
+                                             Margin="0,0,0,5"/>
+									<TextBlock Text="€ 4.125,00"
+                                             FontSize="28"
+                                             FontWeight="Bold"
+                                             Foreground="White"
+                                             FontFamily="Consolas"/>
+								</StackPanel>
+							</Border>
+
+							<!-- Aantal × Prijs -->
+							<Border Grid.Column="0" Grid.Row="2"
+                                    Background="#000000"
+                                    BorderBrush="White"
+                                    BorderThickness="2"
+                                    CornerRadius="8"
+                                    Padding="15"
+                                    Opacity="0.4">
+								<StackPanel>
+									<TextBlock Text="Aantal × Huidige Prijs:"
+                                             FontSize="16"
+                                             Foreground="#D1D5DB"
+                                             Margin="0,0,0,5"/>
+									<TextBlock Text="25 × € 178,50"
+                                             FontSize="22"
+                                             FontWeight="Bold"
+                                             Foreground="White"
+                                             FontFamily="Consolas"/>
+								</StackPanel>
+							</Border>
+
+							<!-- Winst -->
+							<Border Grid.Column="2" Grid.Row="2"
+                                    Background="#000000"
+                                    BorderBrush="White"
+                                    BorderThickness="2"
+                                    CornerRadius="8"
+                                    Padding="15"
+                                    Opacity="0.4">
+								<StackPanel>
+									<TextBlock Text="Winst:"
+                                             FontSize="16"
+                                             Foreground="#D1D5DB"
+                                             Margin="0,0,0,5"/>
+									<TextBlock Text="€ 337,50"
+                                             FontSize="28"
+                                             FontWeight="Bold"
+                                             Foreground="#4ADE80"
+                                             FontFamily="Consolas"/>
+									<TextBlock Text="+8,18%"
+                                             FontSize="22"
+                                             FontWeight="SemiBold"
+                                             Foreground="#4ADE80"
+                                             Margin="0,5,0,0"/>
+								</StackPanel>
+							</Border>
+						</Grid>
+
+						<!-- Aankoopinfo -->
+						<Border Background="#000000"
+                                BorderBrush="White"
+                                BorderThickness="2"
+                                CornerRadius="8"
+                                Padding="15"
+                                Margin="0,10,0,0"
+                                Opacity="0.4">
+							<TextBlock Foreground="#D1D5DB" FontSize="15">
+								<Run Text="Aankoopinfo:" FontWeight="Bold"/>
+								<Run Text=" 25 stuks à € 165,00 op 15-03-2024"/>
+							</TextBlock>
+						</Border>
+					</StackPanel>
+				</Border>
+
+				<!-- DE REST VAN DE INVESTERINGEN BLIJVEN HETZELFDE -->
+				<!-- Kopieer de andere 3 investeringen cards hier (Vanguard, Clean Energy, Microsoft) -->
+
+				<!-- ========== TERUG KNOP ========== -->
+				<Button x:Name="BackButtonMain"
+                        Height="80"
+                        FontSize="24"
+                        FontWeight="Bold"
+                        Background="#FACC15"
+                        Foreground="Black"
+                        BorderBrush="#FACC15"
+                        BorderThickness="4"
+                        Cursor="Hand"
+                        Margin="0,0,0,25">
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Text="←" FontSize="32" Margin="0,0,15,0"/>
+						<TextBlock Text="Terug" VerticalAlignment="Center"/>
+					</StackPanel>
+				</Button>
+
+				<!-- ========== ACCESSIBILITY INFO ========== -->
+				<Border Background="#1F2937"
+                        BorderBrush="#374151"
+                        BorderThickness="4"
+                        CornerRadius="8"
+                        Padding="25">
+					<StackPanel>
+						<!-- Sneltoetsen -->
+						<StackPanel Orientation="Horizontal"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,15">
+							<TextBlock Text="Sneltoetsen: "
+                                     FontSize="18"
+                                     FontWeight="Bold"
+                                     Foreground="#D1D5DB"
+                                     VerticalAlignment="Center"/>
+							<TextBlock Text="Druk op "
+                                     FontSize="18"
+                                     Foreground="#D1D5DB"
+                                     VerticalAlignment="Center"
+                                     Margin="5,0,0,0"/>
+							<Border Background="#374151"
+                                    BorderBrush="#4B5563"
+                                    BorderThickness="2"
+                                    CornerRadius="6"
+                                    Padding="10,5"
+                                    Margin="5,0">
+								<TextBlock Text="Z"
+                                         FontSize="20"
+                                         FontWeight="Bold"
+                                         Foreground="White"/>
+							</Border>
+							<TextBlock Text=" om terug te gaan"
+                                     FontSize="18"
+                                     Foreground="#D1D5DB"
+                                     VerticalAlignment="Center"/>
+						</StackPanel>
+
+						<!-- Tip -->
+						<StackPanel Orientation="Horizontal"
+                                   HorizontalAlignment="Center">
+							<TextBlock Text="Tip: "
+                                     FontSize="16"
+                                     FontWeight="Bold"
+                                     Foreground="#D1D5DB"
+                                     VerticalAlignment="Center"/>
+							<TextBlock Text="Gebruik "
+                                     FontSize="16"
+                                     Foreground="#D1D5DB"
+                                     VerticalAlignment="Center"
+                                     Margin="5,0,0,0"/>
+							<Border Background="#374151"
+                                    BorderBrush="#4B5563"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="6,3"
+                                    Margin="5,0">
+								<TextBlock Text="Tab"
+                                         FontSize="14"
+                                         FontWeight="SemiBold"
+                                         Foreground="White"/>
+							</Border>
+							<TextBlock Text=" om tussen investeringen te navigeren"
+                                     FontSize="16"
+                                     Foreground="#D1D5DB"
+                                     VerticalAlignment="Center"
+                                     Margin="5,0,0,0"/>
+						</StackPanel>
+					</StackPanel>
+				</Border>
+
+			</StackPanel>
+		</ScrollViewer>
+	</Grid>
+</Window>
