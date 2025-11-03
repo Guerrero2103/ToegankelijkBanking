@@ -1,4 +1,9 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace BankApp_WPF
 {
@@ -7,6 +12,23 @@ namespace BankApp_WPF
         public CardStopPagina()
         {
             InitializeComponent();
+        }
+
+        // Toegankelijkheidsknop placeholder
+        private void BtnAccessibility_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Toegankelijkheidsopties worden later toegevoegd.",
+                            "AccessBank - Toegankelijkheid",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+        }
+
+        // Terug naar hoofdmenu
+        private void BtnTerug_Click(object sender, RoutedEventArgs e)
+        {
+            HoofdPagina hoofdPagina = new HoofdPagina();
+            hoofdPagina.Show();
+            this.Close();
         }
     }
 }
