@@ -79,7 +79,7 @@ namespace BankApp_WPF
         }
 
         private void MaakVeldenLeeg()
-        {
+        
             NaamBox.Clear();
             EmailBox.Clear();
             WachtwoordBox.Clear();
