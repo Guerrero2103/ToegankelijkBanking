@@ -1,8 +1,0 @@
-﻿<Window x:Class="BankApp_WPF.Sparenpage"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Start" Height="450" Width="800" WindowStartupLocation="CenterScreen">
-    <Grid>
-        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18">Startpagina (tijdelijke inhoud)</TextBlock>
-    </Grid>
-</Window>
