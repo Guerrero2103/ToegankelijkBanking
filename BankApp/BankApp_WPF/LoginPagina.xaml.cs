@@ -16,13 +16,13 @@ namespace BankApp_WPF
         {
             InitializeComponent();
 
-         
+
             this.Loaded += (s, e) => TxtEmail.Focus();
         }
 
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
-           
+
             StartPagina startPagina = new StartPagina();
             startPagina.Show();
             this.Close();
@@ -30,7 +30,7 @@ namespace BankApp_WPF
 
         private void BtnTheme_Click(object sender, RoutedEventArgs e)
         {
-        
+
             isDarkMode = !isDarkMode;
 
             if (isDarkMode)
@@ -49,7 +49,7 @@ namespace BankApp_WPF
 
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
-            
+
             string email = TxtEmail.Text.Trim();
             string password = TxtPassword.Password;
 
@@ -69,7 +69,7 @@ namespace BankApp_WPF
                 return;
             }
 
-         
+
             if (!IsValidEmail(email))
             {
                 ShowError("Ongeldig email formaat. Gebruik: gebruiker@voorbeeld.be");
@@ -111,7 +111,7 @@ namespace BankApp_WPF
 
         private void TxtPassword_KeyDown(object sender, KeyEventArgs e)
         {
-            
+
             if (e.Key == Key.Enter)
             {
                 BtnLogin_Click(sender, e);
@@ -120,14 +120,14 @@ namespace BankApp_WPF
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-           
+
             if (e.Key == Key.Escape)
             {
                 BtnBack_Click(sender, e);
             }
         }
 
-       
+
         private void ShowError(string message)
         {
             TxtError.Text = message;
