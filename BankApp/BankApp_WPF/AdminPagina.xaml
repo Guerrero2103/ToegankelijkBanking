@@ -5,7 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BankApp_WPF"
         mc:Ignorable="d"
-        Title="AdminPagina" Height="450" Width="800">
+        Title="AdminPagina"
+        Height="900"
+        Width="1600"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="#000000">
 
     <Grid Background="#000000">
         <Grid.RowDefinitions>

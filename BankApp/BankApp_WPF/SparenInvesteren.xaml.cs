@@ -10,7 +10,7 @@ public partial class SparenInvesteren : Window
     public SparenInvesteren()
     {
         
-
+        InitializeComponent();
         // Enable keyboard shortcuts
         this.KeyDown += Window_KeyDown;
         this.Focusable = true;
@@ -70,8 +70,9 @@ public partial class SparenInvesteren : Window
     // Sparen knop
     private void BtnSparen_Click(object sender, RoutedEventArgs e)
     {
-        AnnounceMessage("Openen sparen pagina");
-        OpenSparenPagina();
+        Sparen sparen = new Sparen();
+        sparen.Show();
+        this.Close();
     }
 
     // Alternative name
@@ -83,8 +84,9 @@ public partial class SparenInvesteren : Window
     // Investeren knop
     private void BtnInvesteren_Click(object sender, RoutedEventArgs e)
     {
-        AnnounceMessage("Openen investeren pagina");
-        OpenInvesterenPagina();
+        InvesteringenPagina investeringenPagina = new InvesteringenPagina();
+        investeringenPagina.Show();
+        this.Close();
     }
 
     // Alternative name

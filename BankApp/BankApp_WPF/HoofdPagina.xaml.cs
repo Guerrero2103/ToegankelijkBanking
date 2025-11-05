@@ -52,27 +52,37 @@ namespace BankApp_WPF
 
         private void BtnViewSaldo_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Saldo raadplegen...");
+            SaldoRaadplegenPagina saldoRaadplegenPagina = new SaldoRaadplegenPagina();
+            saldoRaadplegenPagina.Show();
+            this.Close();
         }
 
         private void BtnInvest_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Sparen en investeren scherm openen...");
+            SparenInvesteren sparenInvesteren = new SparenInvesteren();
+            sparenInvesteren.Show();
+            this.Close();
         }
 
         private void BtnTransfer_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Overschrijven scherm openen...");
+            OverschrijvingenPagina overschrijvingenPagina = new OverschrijvingenPagina();
+            overschrijvingenPagina.Show();
+            this.Close();
         }
 
         private void BtnProfile_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Profiel raadplegen...");
+            ProfilePage profilePage = new ProfilePage();
+            profilePage.Show();
+            this.Close();
         }
 
         private void BtnContact_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Contact opnemen met de bank...");
+            KlantendienstPagina klantendienstPagina = new KlantendienstPagina();
+            klantendienstPagina.Show();
+            this.Close();
         }
 
         private void BtnLogout_Click(object sender, RoutedEventArgs e)
