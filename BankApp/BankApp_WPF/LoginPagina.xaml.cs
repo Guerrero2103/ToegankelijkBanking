@@ -159,9 +159,23 @@ namespace BankApp_WPF
                 if (gebruiker == null)
                     return false;
 
-                // 🔐 Eenvoudige vergelijking (later vervangen door echte hashing)
-                return gebruiker.WachtwoordHash == password;
+                // 🔐 Hash het ingevoerde wachtwoord
+                var ingevoerdeHash = HashWachtwoord(password);
+
+                // Vergelijk hashes
+                return gebruiker.WachtwoordHash == ingevoerdeHash;
             }
         }
+
+        private string HashWachtwoord(string wachtwoord)
+        {
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(wachtwoord);
+                byte[] hash = sha256.ComputeHash(bytes);
+                return Convert.ToBase64String(hash);
+            }
+        }
+
     }
 }
