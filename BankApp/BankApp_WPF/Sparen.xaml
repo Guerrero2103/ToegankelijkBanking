@@ -5,6 +5,7 @@
         Height="900"
         Width="1600"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         Background="#000000">
 
     <Window.Resources>
@@ -51,7 +52,7 @@
         </Style>
     </Window.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,-271">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,-27,0,-6" HorizontalAlignment="Left" Width="1579">
         <StackPanel HorizontalAlignment="Center" Margin="40">
 
             <TextBlock Text="Mijn Spaarrekeningen"

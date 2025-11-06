@@ -5,9 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Sparen en Investeren"
-        Background="#000000"
-        Height="700" Width="800">
-
+        Height="900"
+        Width="1600"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="#000000">
     <Grid Margin="40">
 
         <!-- Terug-knop linksboven -->
