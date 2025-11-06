@@ -16,8 +16,8 @@ namespace BankApp_WPF
 
         private void SavingsButton_Click(object sender, RoutedEventArgs e)
         {
-            Sparenpage sparenPage = new Sparenpage();
-            sparenPage.Show();
+            Sparen sparen = new Sparen();
+            sparen.Show();
             this.Close();
         }
 

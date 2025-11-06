@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace BankApp_Models
 {
@@ -39,7 +40,7 @@ namespace BankApp_Models
             if (!optionsBuilder.IsConfigured)
             {
                 string basePath = AppDomain.CurrentDomain.BaseDirectory;
-                string solutionPath = Path.GetFullPath(Path.Combine(basePath, @"..\..\..\..\")); // Ga terug naar solution root
+                string solutionPath = Path.GetFullPath(Path.Combine(basePath, @"..\..\..\..\"));
                 string dbPath = Path.Combine(solutionPath, "BankApp_Models", "bankapp.db");
 
                 Console.WriteLine($"[DB PATH] {dbPath}");
@@ -96,7 +97,7 @@ namespace BankApp_Models
                 {
                     Id = 1,
                     Email = "jan.peeters@example.com",
-                    WachtwoordHash = "hashed_pw_123",
+                    WachtwoordHash = HashWachtwoord("wachtwoord123"),
                     Telefoonnummer = "0478123456",
                     Geboortedatum = new DateTime(1990, 4, 15),
                     Straatnaam = "Kerkstraat",
@@ -111,7 +112,7 @@ namespace BankApp_Models
                 {
                     Id = 2,
                     Email = "sarah.janssens@example.com",
-                    WachtwoordHash = "hashed_pw_456",
+                    WachtwoordHash = HashWachtwoord("wachtwoord456"),
                     Telefoonnummer = "0498765432",
                     Geboortedatum = new DateTime(1985, 10, 2),
                     Straatnaam = "Stationslaan",
@@ -126,7 +127,7 @@ namespace BankApp_Models
                 {
                     Id = 3,
                     Email = "beheerder@bankapp.local",
-                    WachtwoordHash = "admin_pw_789",
+                    WachtwoordHash = HashWachtwoord("admin123"),
                     Telefoonnummer = "0412345678",
                     Geboortedatum = new DateTime(1975, 6, 25),
                     Straatnaam = "Marktplein",
@@ -195,6 +196,18 @@ namespace BankApp_Models
                 new Afspraak { Id = 2, GebruikerId = 2, Datum = new DateTime(2024, 11, 7, 10, 30, 0), Onderwerp = "Investering bespreken", Status = AfspraakStatus.InAfwachting }
             );
         }
+
+        // 🔐 Helper method voor wachtwoord hashing (NA OnModelCreating!)
+        private static string HashWachtwoord(string wachtwoord)
+        {
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(wachtwoord);
+                byte[] hash = sha256.ComputeHash(bytes);
+                return Convert.ToBase64String(hash);
+            }
+        }
     }
 }
+
 
