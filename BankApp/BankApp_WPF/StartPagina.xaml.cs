@@ -1,18 +1,18 @@
-﻿using System.Windows;
+﻿using BankApp_WPF;
+using System.Windows;
 using System.Windows.Media;
 
 namespace BankApp_WPF
 {
     public partial class StartPagina : Window
     {
-        private bool isDarkTheme = true; // bepaalt welk thema actief is
+        private bool isDarkTheme = true;
 
         public StartPagina()
         {
             InitializeComponent();
         }
 
-        // 🔹 Registratiepagina openen
         private void BtnRegister_Click(object sender, RoutedEventArgs e)
         {
             RegistratiePagina registratiePagina = new RegistratiePagina();
@@ -20,7 +20,6 @@ namespace BankApp_WPF
             this.Close();
         }
 
-        // 🔹 Loginpagina openen
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
             LoginPagina loginPagina = new LoginPagina();
@@ -28,7 +27,6 @@ namespace BankApp_WPF
             this.Close();
         }
 
-        // 🔹 Card Stop actie
         private void BtnCardStop_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show(
@@ -45,7 +43,6 @@ namespace BankApp_WPF
             }
         }
 
-        // 🔹 Thema wisselen
         private void BtnTheme_Click(object sender, RoutedEventArgs e)
         {
             isDarkTheme = !isDarkTheme;
@@ -62,7 +59,6 @@ namespace BankApp_WPF
             }
         }
 
-        // 🔹 Help-venster
         private void BtnHelp_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show(
@@ -74,6 +70,13 @@ namespace BankApp_WPF
                 "Help",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
+        }
+
+        private void BtnKlantendienst_Click(object sender, RoutedEventArgs e)
+        {
+            KlantendienstPagina klantendienst = new KlantendienstPagina();
+            klantendienst.Show();
+            this.Close();
         }
     }
 }
