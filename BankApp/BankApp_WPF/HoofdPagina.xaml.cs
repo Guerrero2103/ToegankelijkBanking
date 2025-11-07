@@ -34,9 +34,15 @@ namespace BankApp_WPF
             MessageBox.Show("Profiel raadplegen...");
         }
 
+        // ☎️ Knop voor klantendienst
         private void BtnContact_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Contact opnemen met de bank...");
+            // Open de Klantendienstpagina
+            KlantendienstPagina klantendienst = new KlantendienstPagina();
+            klantendienst.Show();
+
+            // Sluit de huidige HoofdPagina
+            this.Close();
         }
 
         private void BtnLogout_Click(object sender, RoutedEventArgs e)
