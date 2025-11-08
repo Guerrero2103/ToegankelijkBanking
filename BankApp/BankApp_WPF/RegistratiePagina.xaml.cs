@@ -112,8 +112,6 @@ namespace BankApp_WPF
                 MessageBoxImage.Information);
         }
 
-        // --- VALIDATIE EN HELPERS ---
-
         private string ValideerFormulier()
         {
             StringBuilder sb = new StringBuilder();

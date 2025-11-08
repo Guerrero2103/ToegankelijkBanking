@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace BankApp_Models
 {
@@ -39,7 +40,7 @@ namespace BankApp_Models
             if (!optionsBuilder.IsConfigured)
             {
                 string basePath = AppDomain.CurrentDomain.BaseDirectory;
-                string solutionPath = Path.GetFullPath(Path.Combine(basePath, @"..\..\..\..\")); // Ga terug naar solution root
+                string solutionPath = Path.GetFullPath(Path.Combine(basePath, @"..\..\..\..\"));
                 string dbPath = Path.Combine(solutionPath, "BankApp_Models", "bankapp.db");
 
                 Console.WriteLine($"[DB PATH] {dbPath}");
@@ -197,6 +198,18 @@ namespace BankApp_Models
                 new Afspraak { Id = 2, GebruikerId = 2, Datum = new DateTime(2024, 11, 7, 10, 30, 0), Onderwerp = "Investering bespreken", Status = AfspraakStatus.InAfwachting }
             );
         }
+
+        // 🔐 Helper method voor wachtwoord hashing (NA OnModelCreating!)
+        private static string HashWachtwoord(string wachtwoord)
+        {
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(wachtwoord);
+                byte[] hash = sha256.ComputeHash(bytes);
+                return Convert.ToBase64String(hash);
+            }
+        }
     }
 }
+
 
