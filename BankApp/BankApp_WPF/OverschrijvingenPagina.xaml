@@ -5,7 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BankApp_WPF"
         mc:Ignorable="d"
-        Title="OverschrijvingenPagina" Height="450" Width="800">
+        Title="OverschrijvingenPagina" 
+        Height="900"
+        Width="1600"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="#000000">
 
     <Window.Resources>
         <!-- Modern Button Style -->
@@ -16,22 +21,24 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Height" Value="50"/>
+            <Setter Property="MinWidth" Value="140"/>
             <Setter Property="Margin" Value="0,10"/>
+            <Setter Property="Padding" Value="12,8"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
                                 CornerRadius="10"
-                                Padding="20">
+                                Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" Value="0.9"/>
+                                <Setter Property="Opacity" Value="0.95"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Opacity" Value="0.8"/>
+                                <Setter Property="Opacity" Value="0.9"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -90,11 +97,15 @@
         </Border>
 
         <!-- Main Content -->
+        <!-- Let op: ScrollViewer is nu stretchend zodat inhoud niet wordt weggeschoven naar rechts -->
         <ScrollViewer Margin="0,80,0,0"
-                      VerticalScrollBarVisibility="Auto" HorizontalAlignment="Right" Width="800" Background="#000000">
-            <StackPanel MaxWidth="900"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto"
+                      HorizontalAlignment="Stretch"
+                      Background="Transparent">
+            <StackPanel MaxWidth="720"
+                        HorizontalAlignment="Center"
                         Margin="40">
-
                 <Border Background="#FFD700"
                         CornerRadius="20"
                         Padding="40"
