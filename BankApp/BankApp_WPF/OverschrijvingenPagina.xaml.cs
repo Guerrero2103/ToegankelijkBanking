@@ -1,89 +1,141 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using BankApp_Models;
+using BankApp_BusinessLogic;
 
 namespace BankApp_WPF
 {
-    /// <summary>
-    /// Interaction logic for OverschrijvingenPagina.xaml
-    /// </summary>
-        // Pagina voor het maken van overschrijvingen
-        public partial class OverschrijvingenPagina : Window
+    public partial class OverschrijvingenPagina : Window
+    {
+        private readonly ITransactieService _transactieService;
+        private readonly IRekeningService _rekeningService;
+
+        public OverschrijvingenPagina()
         {
-            public OverschrijvingenPagina()
-            {
-                InitializeComponent();
-            }
+            InitializeComponent();
 
-            // Terug knop - sluit het huidige venster
-            private void BtnTerug_Click(object sender, RoutedEventArgs e)
+            if (!SessionManager.IsLoggedIn)
             {
+                MessageBox.Show("Je moet ingelogd zijn om overschrijvingen te doen.",
+                    "Niet ingelogd", MessageBoxButton.OK, MessageBoxImage.Warning);
                 this.Close();
+                return;
             }
 
-            // Annuleren knop - wist alle invoervelden
-            private void BtnAnnuleren_Click(object sender, RoutedEventArgs e)
+            var context = new AppDbContext();
+            _transactieService = new TransactieService(context);
+            _rekeningService = new RekeningService(context);
+        }
+
+        private void BtnTerug_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void BtnAnnuleren_Click(object sender, RoutedEventArgs e)
+        {
+            txtIban.Clear();
+            txtNaamOntvanger.Clear();
+            txtBedrag.Clear();
+            txtOmschrijving.Clear();
+            MessageBox.Show("Overschrijving geannuleerd.", "Geannuleerd",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private async void BtnVerzenden_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtIban.Text))
             {
-                txtIban.Clear();
-                txtNaamOntvanger.Clear();
-                txtBedrag.Clear();
-                txtOmschrijving.Clear();
-                MessageBox.Show("Overschrijving geannuleerd.", "Info");
+                MessageBox.Show("Voer een IBAN in.", "Validatiefout",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
-            // Verzenden knop - valideert en verwerkt de overschrijving
-            private void BtnVerzenden_Click(object sender, RoutedEventArgs e)
+            if (string.IsNullOrWhiteSpace(txtNaamOntvanger.Text))
             {
-                // Controleer of alle vereiste velden ingevuld zijn
-                if (string.IsNullOrWhiteSpace(txtIban.Text))
+                MessageBox.Show("Voer de naam van de ontvanger in.", "Validatiefout",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!decimal.TryParse(txtBedrag.Text, out decimal bedrag) || bedrag <= 0)
+            {
+                MessageBox.Show("Voer een geldig bedrag in (groter dan 0).", "Validatiefout",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            string naarIban = txtIban.Text.Trim().Replace(" ", "").ToUpper();
+            if (!naarIban.StartsWith("BE") || naarIban.Length < 14)
+            {
+                MessageBox.Show("Ongeldig IBAN formaat.", "Validatiefout",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var bevestiging = MessageBox.Show(
+                $"Overschrijving bevestigen?\n\n" +
+                $"Bedrag: €{bedrag:N2}\n" +
+                $"Naar: {txtNaamOntvanger.Text}\n" +
+                $"IBAN: {naarIban}",
+                "Bevestiging",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (bevestiging != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                var gebruikerId = SessionManager.CurrentUser!.Id;
+                var gebruikerRekeningen = await _rekeningService
+                    .GetRekeningenByGebruikerIdAsync(gebruikerId);
+
+                var vanRekening = gebruikerRekeningen
+                    .FirstOrDefault(r => r.Type == RekeningType.Zicht);
+
+                if (vanRekening == null)
                 {
-                    MessageBox.Show("Voer alstublieft een IBAN in.", "Fout");
+                    MessageBox.Show("Je hebt geen zichtrekening.",
+                        "Geen rekening", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(txtNaamOntvanger.Text))
+                var (succes, bericht, transactie) = await _transactieService.MaakOverschrijvingAsync(
+                    vanIban: vanRekening.Iban,
+                    naarIban: naarIban,
+                    bedrag: bedrag,
+                    omschrijving: txtOmschrijving.Text.Trim(),
+                    gebruikerId: gebruikerId
+                );
+
+                if (succes)
                 {
-                    MessageBox.Show("Voer alstublieft de naam van de ontvanger in.", "Fout");
-                    return;
-                }
+                    MessageBox.Show(
+                        $"✅ Overschrijving succesvol!\n\n" +
+                        $"Bedrag: €{bedrag:N2}\n" +
+                        $"Naar: {txtNaamOntvanger.Text}",
+                        "Succes",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
 
-                if (string.IsNullOrWhiteSpace(txtBedrag.Text))
+                    txtIban.Clear();
+                    txtNaamOntvanger.Clear();
+                    txtBedrag.Clear();
+                    txtOmschrijving.Clear();
+                }
+                else
                 {
-                    MessageBox.Show("Voer alstublieft een bedrag in.", "Fout");
-                    return;
+                    MessageBox.Show($"❌ {bericht}", "Fout",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-
-                // Controleer of het bedrag een geldig getal is
-                if (!decimal.TryParse(txtBedrag.Text, out decimal amount))
-                {
-                    MessageBox.Show("Het bedrag moet een geldig getal zijn.", "Fout");
-                    return;
-                }
-
-                if (amount <= 0)
-                {
-                    MessageBox.Show("Het bedrag moet groter zijn dan 0.", "Fout");
-                    return;
-                }
-
-                // Laat succes bericht zien en leeg de velden
-                MessageBox.Show($"Overschrijving van €{amount:F2} naar {txtNaamOntvanger.Text} verzonden!", "Succes");
-
-                // Leeg alle velden
-                txtIban.Clear();
-                txtNaamOntvanger.Clear();
-                txtBedrag.Clear();
-                txtOmschrijving.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout: {ex.Message}", "Kritieke Fout",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+    }
 }
