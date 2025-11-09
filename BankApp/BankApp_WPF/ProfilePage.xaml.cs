@@ -12,6 +12,11 @@ namespace BankApp_WPF
         // Terug knop - sluit het venster
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
+            // Open de HoofdPagina
+            HoofdPagina hoofdPagina = new HoofdPagina();
+            hoofdPagina.Show();
+
+            // Sluit dit venster
             this.Close();
         }
 

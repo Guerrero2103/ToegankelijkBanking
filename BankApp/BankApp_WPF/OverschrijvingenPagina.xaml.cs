@@ -25,14 +25,19 @@ namespace BankApp_WPF
                 InitializeComponent();
             }
 
-            // Terug knop - sluit het huidige venster
-            private void BtnTerug_Click(object sender, RoutedEventArgs e)
-            {
-                this.Close();
-            }
+        // Terug knop - sluit het huidige venster
+        private void BtnTerug_Click(object sender, RoutedEventArgs e)
+        {
+            // Open de HoofdPagina
+            HoofdPagina hoofdPagina = new HoofdPagina();
+            hoofdPagina.Show();
 
-            // Annuleren knop - wist alle invoervelden
-            private void BtnAnnuleren_Click(object sender, RoutedEventArgs e)
+            // Sluit dit venster
+            this.Close();
+        }
+
+        // Annuleren knop - wist alle invoervelden
+        private void BtnAnnuleren_Click(object sender, RoutedEventArgs e)
             {
                 txtIban.Clear();
                 txtNaamOntvanger.Clear();

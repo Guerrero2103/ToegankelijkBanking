@@ -165,7 +165,7 @@ namespace BankApp_WPF
                 var ingevoerdeHash = HashWachtwoord(password);
 
                 // 🧩 Debug info in popup (alleen tijdelijk!)
-                string debugInfo =
+                /*string debugInfo =
                     $"=== LOGIN DEBUG ===\n" +
                     $"Email: {email}\n\n" +
                     $"Wachtwoord: {password}\n\n" +
@@ -173,7 +173,7 @@ namespace BankApp_WPF
                     $"Database hash:\n{gebruiker.WachtwoordHash}\n\n" +
                     $"Hash match? {(ingevoerdeHash == gebruiker.WachtwoordHash)}";
 
-                MessageBox.Show(debugInfo, "Login Debug Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(debugInfo, "Login Debug Info", MessageBoxButton.OK, MessageBoxImage.Information);*/
 
                 return gebruiker.WachtwoordHash == ingevoerdeHash;
             }
