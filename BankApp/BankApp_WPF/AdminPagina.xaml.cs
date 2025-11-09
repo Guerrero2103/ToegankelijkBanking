@@ -21,11 +21,18 @@ namespace BankApp_WPF
     /// </summary>
     public partial class AdminPagina : Window
     {
-
+        // Property voor data binding van klanten
+        private System.Collections.ObjectModel.ObservableCollection<Gebruiker> _klanten;
+        public System.Collections.ObjectModel.ObservableCollection<Gebruiker> Klanten
+        {
+            get { return _klanten; }
+            set { _klanten = value; }
+        }
 
         public AdminPagina()
         {
             InitializeComponent();
+            Klanten = new System.Collections.ObjectModel.ObservableCollection<Gebruiker>();
             LaadKlanten(); // Laad klanten bij opstarten
         }
 
@@ -42,8 +49,20 @@ namespace BankApp_WPF
                         .Include(g => g.Rekeningen)
                         .ToList();
 
-                    // Voor nu: toon aantal in console/debug
-                    Console.WriteLine($"Aantal gebruikers geladen: {gebruikers.Count}");
+                    // Leeg de huidige lijst en vul opnieuw
+                    Klanten.Clear();
+                    foreach (var gebruiker in gebruikers)
+                    {
+                        Klanten.Add(gebruiker);
+                    }
+
+                    // Update de ListBox
+                    KlantenListBox.ItemsSource = Klanten;
+
+                    // Update de teller in de UI
+                    KlantenTellerTextBlock.Text = $"Klanten overzicht ({gebruikers.Count})";
+
+                    Console.WriteLine($"✅ Aantal gebruikers geladen: {gebruikers.Count}");
                 }
             }
             catch (Exception ex)
@@ -68,20 +87,6 @@ namespace BankApp_WPF
         private void BtnKlantOpslaan_Click(object sender, RoutedEventArgs e)
         {
             // Validatie: controleer of verplichte velden zijn ingevuld
-            if (string.IsNullOrWhiteSpace(FirstNameTextBox.Text))
-            {
-                MessageBox.Show("Voornaam is verplicht!", "Fout",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(LastNameTextBox.Text))
-            {
-                MessageBox.Show("Naam is verplicht!", "Fout",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
             if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
             {
                 MessageBox.Show("Email is verplicht!", "Fout",
@@ -136,7 +141,6 @@ namespace BankApp_WPF
                         context.SaveChanges();
 
                         MessageBox.Show($"Nieuwe klant toegevoegd!\n\n" +
-                            $"Naam: {FirstNameTextBox.Text} {LastNameTextBox.Text}\n" +
                             $"Email: {EmailTextBox.Text}\n" +
                             $"ID: {nieuweGebruiker.Id}",
                             "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -208,13 +212,16 @@ namespace BankApp_WPF
             }
         }
 
-        // Simpele password hashing functie
+        // Password hashing functie met SHA256 (zelfde als LoginPagina)
         private string HashPassword(string password)
         {
-            // Voor productie: gebruik BCrypt of ASP.NET Identity
-            // Voor nu: simpele hash voor demonstratie
-            return Convert.ToBase64String(
-                System.Text.Encoding.UTF8.GetBytes(password + "_salt123"));
+            // Hash het wachtwoord met SHA256 (zelfde methode als in LoginPagina)
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(password);
+                byte[] hash = sha256.ComputeHash(bytes);
+                return Convert.ToBase64String(hash);
+            }
         }
 
 
@@ -245,8 +252,6 @@ namespace BankApp_WPF
                     {
                         // Vul formulier met gebruikersgegevens
                         CustomerIdTextBox.Text = gebruiker.Id.ToString();
-                        FirstNameTextBox.Text = ""; // Geen voornaam veld in model
-                        LastNameTextBox.Text = ""; // Geen achternaam veld in model
                         EmailTextBox.Text = gebruiker.Email;
                         PhoneNumberTextBox.Text = gebruiker.Telefoonnummer ?? "";
                         BirthDatePicker.SelectedDate = gebruiker.Geboortedatum;
@@ -343,8 +348,6 @@ namespace BankApp_WPF
         private void ClearForm()
         {
             CustomerIdTextBox.Text = "";
-            FirstNameTextBox.Clear();
-            LastNameTextBox.Clear();
             EmailTextBox.Clear();
             PasswordBox.Clear();
             ConfirmPasswordBox.Clear();
