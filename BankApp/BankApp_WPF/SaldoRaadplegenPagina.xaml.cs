@@ -221,11 +221,6 @@ public partial class SaldoRaadplegenPagina : Window
 
     private void BtnBack_Click(object sender, RoutedEventArgs e)
     {
-        // Open de HoofdPagina
-        HoofdPagina hoofdPagina = new HoofdPagina();
-        hoofdPagina.Show();
-
-        // Sluit dit venster
         this.Close();
     }
 

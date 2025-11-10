@@ -36,11 +36,10 @@ namespace BankApp_WPF
 
         private void BtnTerug_Click(object sender, RoutedEventArgs e)
         {
-            SparenInvesteren sparenInvesteren = new SparenInvesteren();
-            sparenInvesteren.Show();
+            HoofdPagina hoofd = new HoofdPagina();
+            hoofd.Show();
             this.Close();
         }
-
     }
 }
 

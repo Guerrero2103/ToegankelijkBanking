@@ -24,14 +24,10 @@ namespace BankApp_WPF
         }
 
         // Terug knop - sluit het huidige venster
-        // Terug knop - keert terug naar de Sparen & Investeren pagina
         private void BtnTerug_Click(object sender, RoutedEventArgs e)
         {
-            SparenInvesteren sparenInvesteren = new SparenInvesteren();
-            sparenInvesteren.Show();
             this.Close();
         }
-
 
         // Details knop - toont meer informatie over een investering
         private void BtnDetails_Click(object sender, RoutedEventArgs e)
