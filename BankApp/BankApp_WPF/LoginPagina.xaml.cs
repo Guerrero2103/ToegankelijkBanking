@@ -175,7 +175,14 @@ namespace BankApp_WPF
 
                 MessageBox.Show(debugInfo, "Login Debug Info", MessageBoxButton.OK, MessageBoxImage.Information);*/
 
-                return gebruiker.WachtwoordHash == ingevoerdeHash;
+                if (gebruiker.WachtwoordHash == ingevoerdeHash)
+                {
+                    // ✅ Zet de ingelogde gebruiker in de sessie
+                    UserSession.IngelogdeGebruiker = gebruiker;
+                    return true;
+                }
+
+                return false;
             }
         }
 
