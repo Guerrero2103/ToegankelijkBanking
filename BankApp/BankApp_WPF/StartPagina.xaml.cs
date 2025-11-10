@@ -1,5 +1,4 @@
-﻿using BankApp_Models;
-using System.Text;
+﻿using BankApp_WPF;
 using System.Windows;
 using System.Windows.Media;
 
@@ -7,49 +6,13 @@ namespace BankApp_WPF
 {
     public partial class StartPagina : Window
     {
-        private bool isDarkTheme = true; // bepaalt welk thema actief is
+        private bool isDarkTheme = true;
 
         public StartPagina()
         {
             InitializeComponent();
-
-
-            // 🔹 Database aanmaken bij opstarten
-            try
-            {
-                using (var context = new AppDbContext())
-                {
-                    // Database.EnsureCreated() wordt al aangeroepen in de constructor
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Fout bij aanmaken database: {ex.Message}");
-            }
-
-            // 🔹 Tijdelijk debug: alle gebruikers tonen
-            try
-            {
-                using (var context = new AppDbContext())
-                {
-                    var gebruikers = context.Gebruikers.ToList();
-
-                    StringBuilder sb = new StringBuilder();
-                    foreach (var gebruiker in gebruikers)
-                    {
-                        sb.AppendLine($"Id: {gebruiker.Id}, Email: {gebruiker.Email}, RolId: {gebruiker.RolId}");
-                    }
-
-                    MessageBox.Show(sb.Length > 0 ? sb.ToString() : "Geen gebruikers gevonden.");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Fout bij lezen database: {ex.Message}");
-            }
         }
 
-        // 🔹 Registratiepagina openen
         private void BtnRegister_Click(object sender, RoutedEventArgs e)
         {
             RegistratiePagina registratiePagina = new RegistratiePagina();
@@ -57,7 +20,6 @@ namespace BankApp_WPF
             this.Close();
         }
 
-        // 🔹 Loginpagina openen
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
             LoginPagina loginPagina = new LoginPagina();
@@ -65,7 +27,6 @@ namespace BankApp_WPF
             this.Close();
         }
 
-        // 🔹 Card Stop actie
         private void BtnCardStop_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show(
@@ -82,7 +43,6 @@ namespace BankApp_WPF
             }
         }
 
-        // 🔹 Thema wisselen
         private void BtnTheme_Click(object sender, RoutedEventArgs e)
         {
             isDarkTheme = !isDarkTheme;
@@ -99,7 +59,6 @@ namespace BankApp_WPF
             }
         }
 
-        // 🔹 Help-venster
         private void BtnHelp_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show(
@@ -111,6 +70,13 @@ namespace BankApp_WPF
                 "Help",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
+        }
+
+        private void BtnKlantendienst_Click(object sender, RoutedEventArgs e)
+        {
+            KlantendienstPagina klantendienst = new KlantendienstPagina();
+            klantendienst.Show();
+            this.Close();
         }
     }
 }
