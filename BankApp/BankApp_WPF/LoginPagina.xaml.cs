@@ -3,6 +3,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using BankApp_Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankApp_WPF
 {
@@ -14,13 +16,13 @@ namespace BankApp_WPF
         {
             InitializeComponent();
 
-         
+
             this.Loaded += (s, e) => TxtEmail.Focus();
         }
 
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
-           
+
             StartPagina startPagina = new StartPagina();
             startPagina.Show();
             this.Close();
@@ -28,7 +30,7 @@ namespace BankApp_WPF
 
         private void BtnTheme_Click(object sender, RoutedEventArgs e)
         {
-        
+
             isDarkMode = !isDarkMode;
 
             if (isDarkMode)
@@ -47,7 +49,7 @@ namespace BankApp_WPF
 
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
-            
+
             string email = TxtEmail.Text.Trim();
             string password = TxtPassword.Password;
 
@@ -67,7 +69,7 @@ namespace BankApp_WPF
                 return;
             }
 
-         
+
             if (!IsValidEmail(email))
             {
                 ShowError("Ongeldig email formaat. Gebruik: gebruiker@voorbeeld.be");
@@ -75,15 +77,16 @@ namespace BankApp_WPF
                 return;
             }
 
-            
+
             if (ValidateLogin(email, password))
             {
-                MessageBox.Show($"Welkom terug!\n\nEmail: {email}",
-                              "Login Succesvol",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Information);
+                MessageBox.Show("Login succesvol!", "Welkom", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                
+                // Open de hoofdpagina
+                HoofdPagina hoofd = new HoofdPagina();
+                hoofd.Show();
+
+                this.Close();
             }
             else
             {
@@ -108,7 +111,7 @@ namespace BankApp_WPF
 
         private void TxtPassword_KeyDown(object sender, KeyEventArgs e)
         {
-            
+
             if (e.Key == Key.Enter)
             {
                 BtnLogin_Click(sender, e);
@@ -117,14 +120,14 @@ namespace BankApp_WPF
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-           
+
             if (e.Key == Key.Escape)
             {
                 BtnBack_Click(sender, e);
             }
         }
 
-       
+
         private void ShowError(string message)
         {
             TxtError.Text = message;
@@ -146,8 +149,33 @@ namespace BankApp_WPF
 
         private bool ValidateLogin(string email, string password)
         {
-            return email == "test@accessbank.be" && password == "test123";
+            using (var context = new AppDbContext())
+            {
+                // Zoek gebruiker met dit e-mailadres
+                var gebruiker = context.Gebruikers
+                    .Include(g => g.Rol) // optioneel: rol mee laden
+                    .FirstOrDefault(g => g.Email.ToLower() == email.ToLower());
 
+                if (gebruiker == null)
+                    return false;
+
+                // 🔐 Hash het ingevoerde wachtwoord
+                var ingevoerdeHash = HashWachtwoord(password);
+
+                // Vergelijk hashes
+                return gebruiker.WachtwoordHash == ingevoerdeHash;
+            }
         }
+
+        private string HashWachtwoord(string wachtwoord)
+        {
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(wachtwoord);
+                byte[] hash = sha256.ComputeHash(bytes);
+                return Convert.ToBase64String(hash);
+            }
+        }
+
     }
 }

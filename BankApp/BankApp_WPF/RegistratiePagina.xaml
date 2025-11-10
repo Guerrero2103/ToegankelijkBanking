@@ -1,8 +1,172 @@
 <Window x:Class="BankApp_WPF.RegistratiePagina"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Registratie" Height="500" Width="700" WindowStartupLocation="CenterScreen">
+        Title="AccessBank - Registreren"
+        Height="900"
+        Width="1600"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="#000000">
+
+    <Window.Resources>
+        <!-- Zelfde Button Style als HoofdPagina -->
+        <Style x:Key="ModernActionButton" TargetType="Button">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="55"/>
+            <Setter Property="Margin" Value="0,10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                Padding="10,5">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
-        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18">Registratiepagina (tijdelijke inhoud)</TextBlock>
+        <!-- Top Bar -->
+        <Border Background="#000000"
+                Height="80"
+                VerticalAlignment="Top"
+                Padding="40,0">
+            <Grid>
+                <Label Content="AccessBank - Registreren"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Left"/>
+
+                <Button Width="60"
+                        Height="60"
+                        Background="#FFD700"
+                        BorderThickness="0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Click="BtnAccessibility_Click"
+                        Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="10">
+                                <TextBlock Text="Geluid"
+                                           FontSize="18"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <ScrollViewer Margin="0,80,0,0"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="1400"
+                        Margin="40"
+                        HorizontalAlignment="Center">
+
+                <Border Background="#0A1128"
+                        CornerRadius="20"
+                        Padding="40"
+                        Margin="0,20,0,40">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Registreren" FontSize="32" 
+                                   FontWeight="Bold" Foreground="White" 
+                                   Margin="0,0,0,25" HorizontalAlignment="Center"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Linker kolom -->
+                            <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                <TextBlock Text="Naam *" Foreground="White"/>
+                                <TextBox x:Name="NaamBox" Margin="0,5,0,15"/>
+
+                                <TextBlock Text="Email *" Foreground="White"/>
+                                <TextBox x:Name="EmailBox" Margin="0,5,0,15"/>
+
+                                <TextBlock Text="Wachtwoord *" Foreground="White"/>
+                                <PasswordBox x:Name="WachtwoordBox" Margin="0,5,0,15"/>
+
+                                <TextBlock Text="Wachtwoord bevestigen *" Foreground="White"/>
+                                <PasswordBox x:Name="BevestigBox" Margin="0,5,0,15"/>
+
+                                <TextBlock Text="Telefoonnummer *" Foreground="White"/>
+                                <TextBox x:Name="TelefoonBox" Margin="0,5,0,15"/>
+
+                                <TextBlock Text="Geboortedatum *" Foreground="White"/>
+                                <DatePicker x:Name="GeboortePicker" Margin="0,5,0,15"/>
+                            </StackPanel>
+
+                            <!-- Rechter kolom -->
+                            <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                                <TextBlock Text="Adres" FontSize="18" Foreground="#FFD700" Margin="0,0,0,10"/>
+
+                                <TextBlock Text="Straatnaam *" Foreground="White"/>
+                                <TextBox x:Name="StraatBox" Margin="0,5,0,15"/>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <StackPanel Width="150">
+                                        <TextBlock Text="Huisnummer *" Foreground="White"/>
+                                        <TextBox x:Name="HuisnrBox" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Width="100" Margin="10,0,0,0">
+                                        <TextBlock Text="Bus" Foreground="White"/>
+                                        <TextBox x:Name="BusBox" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <TextBlock Text="Postcode *" Foreground="White"/>
+                                <TextBox x:Name="PostcodeBox" Margin="0,5,0,15"/>
+
+                                <TextBlock Text="Gemeente *" Foreground="White"/>
+                                <TextBox x:Name="GemeenteBox" Margin="0,5,0,15"/>
+
+                                <TextBlock Text="Land *" Foreground="White"/>
+                                <TextBox x:Name="LandBox" Margin="0,5,0,15"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="Uw IBAN wordt automatisch toegewezen na succesvolle registratie" 
+                                   Foreground="#8EA9FF" FontSize="14" TextWrapping="Wrap" 
+                                   Margin="0,25,0,20" HorizontalAlignment="Center" Width="600"/>
+
+                        <Button x:Name="RegistreerBtn"
+                                Content="Account aanmaken"
+                                Width="300"
+                                Background="#1E90FF"
+                                Foreground="White"
+                                FontWeight="Bold"
+                                FontSize="18"
+                                Style="{StaticResource ModernActionButton}"
+                                HorizontalAlignment="Center"
+                                Click="RegistreerBtn_Click"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Window>

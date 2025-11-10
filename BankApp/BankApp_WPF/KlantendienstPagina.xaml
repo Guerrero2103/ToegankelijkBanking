@@ -7,6 +7,12 @@
         Background="Black"
         KeyDown="Window_KeyDown">
 
+        Title="Klantendienst"
+        Height="900"
+        Width="1600"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="#000000">
     <Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="500">
 

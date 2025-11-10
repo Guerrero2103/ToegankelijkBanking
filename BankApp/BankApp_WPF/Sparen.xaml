@@ -1,0 +1,148 @@
+﻿<Window x:Class="BankApp_WPF.Sparen"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Sparen"
+        Height="900"
+        Width="1600"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="#000000">
+
+    <Window.Resources>
+        <!-- Gele knopstijl -->
+        <Style x:Key="YellowButton" TargetType="Button">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="#FFD700"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="70"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                Padding="15">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Stijl voor elke spaarrekening-kaart -->
+        <Style x:Key="SpaarCard" TargetType="Border">
+            <Setter Property="CornerRadius" Value="15"/>
+            <Setter Property="Padding" Value="30"/>
+            <Setter Property="Margin" Value="0,20,0,20"/>
+            <Setter Property="Background" Value="#000000"/>
+            <Setter Property="BorderBrush" Value="#00FF99"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="MaxWidth" Value="700"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,-27,0,-6" HorizontalAlignment="Left" Width="1579">
+        <StackPanel HorizontalAlignment="Center" Margin="40">
+
+            <TextBlock Text="Mijn Spaarrekeningen"
+                       FontSize="36"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       Margin="0,0,0,30"/>
+
+            <!-- 🟩 Eerste voorbeeld spaarrekening -->
+            <Border Style="{StaticResource SpaarCard}" BorderBrush="#00FF99">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                        <TextBlock Text="🐷" FontSize="26" Margin="0,0,10,0"/>
+                        <TextBlock Text="Vakantie Spaarrekening"
+                                   FontSize="22"
+                                   FontWeight="Bold"
+                                   Foreground="White"/>
+                    </StackPanel>
+
+                    <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="15" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="Saldo:" Foreground="LightGray" FontSize="14"/>
+                            <TextBlock Text="€ 5.420,50"
+                                       FontSize="36"
+                                       FontWeight="Bold"
+                                       Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="15" Margin="0,0,0,20">
+                        <StackPanel>
+                            <TextBlock Text="Bankrekeningnummer (IBAN):"
+                                       Foreground="LightGray" FontSize="14"/>
+                            <TextBlock Text="BE71 0961 2345 6769"
+                                       FontSize="20"
+                                       FontWeight="SemiBold"
+                                       Foreground="White"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Content="📋 Kopieer IBAN"
+                            Style="{StaticResource YellowButton}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- 🟦 Tweede voorbeeld spaarrekening -->
+            <Border Style="{StaticResource SpaarCard}" BorderBrush="#1E90FF">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                        <TextBlock Text="🐖" FontSize="26" Margin="0,0,10,0"/>
+                        <TextBlock Text="Noodfonds Spaarrekening"
+                                   FontSize="22"
+                                   FontWeight="Bold"
+                                   Foreground="White"/>
+                    </StackPanel>
+
+                    <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="15" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="Saldo:" Foreground="LightGray" FontSize="14"/>
+                            <TextBlock Text="€ 12.850,75"
+                                       FontSize="36"
+                                       FontWeight="Bold"
+                                       Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="15" Margin="0,0,0,20">
+                        <StackPanel>
+                            <TextBlock Text="Bankrekeningnummer (IBAN):"
+                                       Foreground="LightGray" FontSize="14"/>
+                            <TextBlock Text="BE71 0961 9876 5432"
+                                       FontSize="20"
+                                       FontWeight="SemiBold"
+                                       Foreground="White"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Content="📋 Kopieer IBAN"
+                            Style="{StaticResource YellowButton}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Terugknop onderaan -->
+            <Button Content="← Terug"
+                    Style="{StaticResource YellowButton}"
+                    Width="250"
+                    Margin="0,40,0,20"
+                    HorizontalAlignment="Center"/>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
