@@ -97,7 +97,7 @@ namespace BankApp_Models
                 {
                     Id = 1,
                     Email = "jan.peeters@example.com",
-                    WachtwoordHash = HashWachtwoord("wachtwoord123"),
+                    WachtwoordHash = "0aoSMZzxd2FNOX58rGrjz8yXPDRWNIH1a+Fxako2HAQ=", 
                     Telefoonnummer = "0478123456",
                     Geboortedatum = new DateTime(1990, 4, 15),
                     Straatnaam = "Kerkstraat",
@@ -112,7 +112,7 @@ namespace BankApp_Models
                 {
                     Id = 2,
                     Email = "sarah.janssens@example.com",
-                    WachtwoordHash = HashWachtwoord("wachtwoord456"),
+                    WachtwoordHash = "JVbA8nRErxOo9NJKm8V9oLi2wQbU1cQq261nxGXRXWw=",
                     Telefoonnummer = "0498765432",
                     Geboortedatum = new DateTime(1985, 10, 2),
                     Straatnaam = "Stationslaan",
@@ -121,13 +121,13 @@ namespace BankApp_Models
                     Postcode = "3000",
                     Gemeente = "Leuven",
                     Land = "België",
-                    RolId = 1
+                    RolId = 2
                 },
                 new Gebruiker
                 {
                     Id = 3,
                     Email = "beheerder@bankapp.local",
-                    WachtwoordHash = HashWachtwoord("admin123"),
+                    WachtwoordHash = "h59VpFwSfWnwM5ZeEik5P2THryaTweDtix22H4jcEwI=",
                     Telefoonnummer = "0412345678",
                     Geboortedatum = new DateTime(1975, 6, 25),
                     Straatnaam = "Marktplein",
@@ -138,6 +138,8 @@ namespace BankApp_Models
                     RolId = 3
                 }
             );
+
+
 
             // === REKENINGEN SEEDEN ===
             modelBuilder.Entity<Rekening>().HasData(

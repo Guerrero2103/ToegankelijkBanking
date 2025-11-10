@@ -94,8 +94,11 @@
                         </StackPanel>
                     </Border>
 
-                    <Button Content="📋 Kopieer IBAN"
-                            Style="{StaticResource YellowButton}"/>
+                    <Button x:Name="BtnKopieerVakantie"
+                        Content="📋 Kopieer IBAN"
+                        Style="{StaticResource YellowButton}"
+                        Click="BtnKopieerVakantie_Click"/>
+
                 </StackPanel>
             </Border>
 
@@ -132,17 +135,22 @@
                         </StackPanel>
                     </Border>
 
-                    <Button Content="📋 Kopieer IBAN"
-                            Style="{StaticResource YellowButton}"/>
+                    <Button x:Name="BtnKopieerNoodfonds"
+                        Content="📋 Kopieer IBAN"
+                        Style="{StaticResource YellowButton}"
+                        Click="BtnKopieerNoodfonds_Click"/>
+
                 </StackPanel>
             </Border>
 
-            <!-- Terugknop onderaan -->
-            <Button Content="← Terug"
-                    Style="{StaticResource YellowButton}"
-                    Width="250"
-                    Margin="0,40,0,20"
-                    HorizontalAlignment="Center"/>
+            <Button x:Name="BtnTerug"
+            Content="← Terug"
+            Style="{StaticResource YellowButton}"
+            Width="250"
+            Margin="0,40,0,20"
+            HorizontalAlignment="Center"
+            Click="BtnTerug_Click"/>
+
         </StackPanel>
     </ScrollViewer>
 </Window>
