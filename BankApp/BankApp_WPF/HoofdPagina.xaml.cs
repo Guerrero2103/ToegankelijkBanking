@@ -1,4 +1,6 @@
 ﻿using BankApp_Models;
+using BankApp_BusinessLogic;
+using System.Linq;
 using System.Text;
 using System.Windows;
 
@@ -6,11 +8,13 @@ namespace BankApp_WPF
 {
     public partial class HoofdPagina : Window
     {
+        private readonly IRekeningService _rekeningService;
+
         public HoofdPagina()
         {
             InitializeComponent();
 
-            // 🔹 Database aanmaken bij opstarten
+            // Initialize database
             try
             {
                 using (var context = new AppDbContext())
@@ -23,25 +27,47 @@ namespace BankApp_WPF
                 MessageBox.Show($"Fout bij aanmaken database: {ex.Message}");
             }
 
-            // 🔹 Tijdelijk debug: alle gebruikers tonen
+            // Initialize services
+            var dbContext = new AppDbContext();
+            _rekeningService = new RekeningService(dbContext);
+
+            // Load user data
+            LoadUserData();
+        }
+
+        private async void LoadUserData()
+        {
+            if (!SessionManager.IsLoggedIn)
+            {
+                MessageBox.Show("Je bent niet ingelogd.", "Fout",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             try
             {
-                using (var context = new AppDbContext())
+                var gebruikerId = SessionManager.CurrentUser!.Id;
+
+                // Haal totaal saldo op
+                var totaalSaldo = await _rekeningService.GetTotaalSaldoAsync(gebruikerId);
+                lblTotalSaldo.Content = $"€{totaalSaldo:N2}";
+
+                // Haal rekeningen op
+                var rekeningen = await _rekeningService.GetRekeningenByGebruikerIdAsync(gebruikerId);
+                var zichtRekening = rekeningen.FirstOrDefault(r => r.Type == RekeningType.Zicht);
+
+                if (zichtRekening != null)
                 {
-                    var gebruikers = context.Gebruikers.ToList();
-
-                    StringBuilder sb = new StringBuilder();
-                    foreach (var gebruiker in gebruikers)
-                    {
-                        sb.AppendLine($"Id: {gebruiker.Id}, Email: {gebruiker.Email}, RolId: {gebruiker.RolId}");
-                    }
-
-                    MessageBox.Show(sb.Length > 0 ? sb.ToString() : "Geen gebruikers gevonden.");
+                    string maskedIban = zichtRekening.Iban.Length > 4
+                        ? "•••• " + zichtRekening.Iban.Substring(zichtRekening.Iban.Length - 4)
+                        : zichtRekening.Iban;
+                    lblAccountNumber.Content = $"Zichtrekening {maskedIban}";
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Fout bij lezen database: {ex.Message}");
+                MessageBox.Show($"Fout bij laden gegevens: {ex.Message}", "Fout",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -86,8 +112,16 @@ namespace BankApp_WPF
 
         private void BtnLogout_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Uitloggen...");
-            this.Close();
+            var result = MessageBox.Show("Weet je zeker dat je wilt uitloggen?",
+                "Uitloggen", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                SessionManager.Logout();
+                StartPagina startPagina = new StartPagina();
+                startPagina.Show();
+                this.Close();
+            }
         }
     }
 }
