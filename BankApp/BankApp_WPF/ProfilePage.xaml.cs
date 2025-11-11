@@ -49,9 +49,12 @@ namespace BankApp_WPF
             }
 
             BirthdatePicker.SelectedDate = _gebruiker.Geboortedatum;
-            AddressTextBox.Text =
-                $"{_gebruiker.Straatnaam} {_gebruiker.Huisnummer}{(_gebruiker.Bus != null ? " " + _gebruiker.Bus : "")}, " +
-                $"{_gebruiker.Postcode} {_gebruiker.Gemeente}";
+            StraatTextBox.Text = _gebruiker.Straatnaam ?? "";
+            HuisnummerTextBox.Text = _gebruiker.Huisnummer ?? "";
+            BusTextBox.Text = _gebruiker.Bus ?? "";
+            PostcodeTextBox.Text = _gebruiker.Postcode ?? "";
+            GemeenteTextBox.Text = _gebruiker.Gemeente ?? "";
+
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
@@ -75,14 +78,79 @@ namespace BankApp_WPF
             }
         }
 
-        // 🚫 SaveButton: voorlopig geen functionaliteit
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Aanpassingen opslaan is momenteel uitgeschakeld.",
-                            "Niet beschikbaar",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
+            if (_gebruiker == null)
+            {
+                MessageBox.Show("Geen actieve gebruiker gevonden.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                using (var context = new AppDbContext())
+                {
+                    var gebruikerInDb = context.Gebruikers.FirstOrDefault(g => g.Id == _gebruiker.Id);
+
+                    if (gebruikerInDb == null)
+                    {
+                        MessageBox.Show("Gebruiker niet gevonden in de database.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // ✅ Validatie
+                    if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
+                    {
+                        MessageBox.Show("E-mail mag niet leeg zijn.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    if (!DateTime.TryParse(BirthdatePicker.Text, out DateTime geboortedatum))
+                    {
+                        MessageBox.Show("Ongeldige geboortedatum.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    // ✅ Wachtwoordoptie (optioneel aanpassen)
+                    if (!string.IsNullOrWhiteSpace(PasswordBox.Password))
+                    {
+                        if (PasswordBox.Password != ConfirmPasswordBox.Password)
+                        {
+                            MessageBox.Show("De wachtwoorden komen niet overeen.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+
+                        gebruikerInDb.WachtwoordHash = HashWachtwoord(PasswordBox.Password);
+                    }
+
+
+                    // 📝 Update velden
+                    gebruikerInDb.Email = EmailTextBox.Text.Trim();
+                    gebruikerInDb.Telefoonnummer = PhoneTextBox.Text.Trim();
+                    gebruikerInDb.Geboortedatum = geboortedatum;
+                    gebruikerInDb.Straatnaam = StraatTextBox.Text.Trim();
+                    gebruikerInDb.Huisnummer = HuisnummerTextBox.Text.Trim();
+                    gebruikerInDb.Bus = string.IsNullOrWhiteSpace(BusTextBox.Text) ? null : BusTextBox.Text.Trim();
+                    gebruikerInDb.Postcode = PostcodeTextBox.Text.Trim();
+                    gebruikerInDb.Gemeente = GemeenteTextBox.Text.Trim();
+
+                    // 💾 Opslaan in DB
+                    context.SaveChanges();
+
+                    // 🔄 Bijwerken in UserSession
+                    UserSession.IngelogdeGebruiker = gebruikerInDb;
+                    _gebruiker = gebruikerInDb;
+
+                    MessageBox.Show("Gegevens succesvol opgeslagen!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Er is een fout opgetreden bij het opslaan: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
+
 
         // 🚫 DeleteButton: voorlopig geen functionaliteit
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
@@ -92,5 +160,16 @@ namespace BankApp_WPF
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
         }
+
+        private string HashWachtwoord(string wachtwoord)
+        {
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(wachtwoord);
+                byte[] hash = sha256.ComputeHash(bytes);
+                return Convert.ToBase64String(hash);
+            }
+        }
+
     }
 }

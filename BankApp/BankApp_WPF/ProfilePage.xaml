@@ -209,24 +209,93 @@
                                   Margin="0,0,0,20"/>
 
 						<!-- Adres -->
-						<TextBlock Text="Adres"
-                                 FontSize="20"
-                                 FontWeight="SemiBold"
-                                 Foreground="White"
-                                 Margin="0,0,0,8"/>
-						<TextBox x:Name="AddressTextBox"
-                               Text="Kerkstraat 123, 1000 Brussel"
-                               Height="60"
-                               FontSize="18"
-                               Background="#1F2937"
-                               Foreground="White"
-                               BorderBrush="#4B5563"
-                               BorderThickness="4"
-                               Padding="15,0"
-                               VerticalContentAlignment="Center"
-                               Margin="0,0,0,30"/>
+                        <!-- Straat -->
+                        <TextBlock Text="Straat"
+                                FontSize="20"
+                                FontWeight="SemiBold"
+                                Foreground="White"
+                                Margin="0,0,0,8"/>
+                        <TextBox x:Name="StraatTextBox"
+                                Height="60"
+                                FontSize="18"
+                                Background="#1F2937"
+                                Foreground="White"
+                                BorderBrush="#4B5563"
+                                BorderThickness="4"
+                                Padding="15,0"
+                                VerticalContentAlignment="Center"
+                                Margin="0,0,0,20"/>
 
-						<!-- Opslaan Knop -->
+                        <!-- Huisnummer -->
+                        <TextBlock Text="Huisnummer"
+                                FontSize="20"
+                                FontWeight="SemiBold"
+                                Foreground="White"
+                                Margin="0,0,0,8"/>
+                        <TextBox x:Name="HuisnummerTextBox"
+                                Height="60"
+                                FontSize="18"
+                                Background="#1F2937"
+                                Foreground="White"
+                                BorderBrush="#4B5563"
+                                BorderThickness="4"
+                                Padding="15,0"
+                                VerticalContentAlignment="Center"
+                                Margin="0,0,0,20"/>
+
+                        <!-- Bus -->
+                        <TextBlock Text="Bus (optioneel)"
+                                FontSize="20"
+                                FontWeight="SemiBold"
+                                Foreground="White"
+                                Margin="0,0,0,8"/>
+                        <TextBox x:Name="BusTextBox"
+                                Height="60"
+                                FontSize="18"
+                                Background="#1F2937"
+                                Foreground="White"
+                                BorderBrush="#4B5563"
+                                BorderThickness="4"
+                                Padding="15,0"
+                                VerticalContentAlignment="Center"
+                                Margin="0,0,0,20"/>
+
+                        <!-- Postcode -->
+                        <TextBlock Text="Postcode"
+                                FontSize="20"
+                                FontWeight="SemiBold"
+                                Foreground="White"
+                                Margin="0,0,0,8"/>
+                        <TextBox x:Name="PostcodeTextBox"
+                                Height="60"
+                                FontSize="18"
+                                Background="#1F2937"
+                                Foreground="White"
+                                BorderBrush="#4B5563"
+                                BorderThickness="4"
+                                Padding="15,0"
+                                VerticalContentAlignment="Center"
+                                Margin="0,0,0,20"/>
+
+                        <!-- Gemeente -->
+                        <TextBlock Text="Gemeente"
+                                FontSize="20"
+                                FontWeight="SemiBold"
+                                Foreground="White"
+                                Margin="0,0,0,8"/>
+                        <TextBox x:Name="GemeenteTextBox"
+                                Height="60"
+                                FontSize="18"
+                                Background="#1F2937"
+                                Foreground="White"
+                                BorderBrush="#4B5563"
+                                BorderThickness="4"
+                                Padding="15,0"
+                                VerticalContentAlignment="Center"
+                                Margin="0,0,0,30"/>
+
+
+                        <!-- Opslaan Knop -->
 						<Button x:Name="SaveButton"
                               Height="80"
                               FontSize="24"
