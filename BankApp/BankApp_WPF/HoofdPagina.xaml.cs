@@ -68,7 +68,6 @@ namespace BankApp_WPF
         {
             OverschrijvingenPagina overschrijvingenPagina = new OverschrijvingenPagina();
             overschrijvingenPagina.Show();
-            this.Close();
         }
 
         private void BtnProfile_Click(object sender, RoutedEventArgs e)
