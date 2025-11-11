@@ -199,16 +199,29 @@
                                  FontWeight="SemiBold"
                                  Foreground="White"
                                  Margin="0,0,0,8"/>
-						<DatePicker x:Name="BirthdatePicker"
-                                  Height="60"
-                                  FontSize="18"
-                                  Background="#1F2937"
-                                  Foreground="White"
-                                  BorderBrush="#4B5563"
-                                  BorderThickness="4"
-                                  Margin="0,0,0,20"/>
+                        <DatePicker x:Name="BirthdatePicker"
+                                Height="60"
+                                FontSize="18"
+                                Background="#1F2937"
+                                Foreground="White"
+                                BorderBrush="#4B5563"
+                                BorderThickness="4"
+                                Margin="0,0,0,20">
+                            <DatePicker.Resources>
+                                <Style TargetType="DatePickerTextBox">
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="Background" Value="#1F2937"/>
+                                    <Setter Property="BorderBrush" Value="#4B5563"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Padding" Value="10,0,0,0"/>
+                                </Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Style>
+                            </DatePicker.Resources>
+                        </DatePicker>
 
-						<!-- Adres -->
+                        <!-- Adres -->
                         <!-- Straat -->
                         <TextBlock Text="Straat"
                                 FontSize="20"

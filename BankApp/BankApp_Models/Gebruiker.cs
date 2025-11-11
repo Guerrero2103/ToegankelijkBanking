@@ -47,6 +47,8 @@ namespace BankApp_Models
         [ForeignKey(nameof(RolId))]
         public Rol? Rol { get; set; }
 
+        public bool IsActief { get; set; } = true;
+
         // 🔹 Navigatie-eigenschappen (relaties met andere tabellen)
         public ICollection<Rekening> Rekeningen { get; set; } = new List<Rekening>();
         public ICollection<Kaart> Kaarten { get; set; } = new List<Kaart>();

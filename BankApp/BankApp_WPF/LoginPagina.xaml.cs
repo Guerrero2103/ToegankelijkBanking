@@ -153,12 +153,23 @@ namespace BankApp_WPF
             {
                 var gebruiker = context.Gebruikers
                     .Include(g => g.Rol)
+                    .IgnoreQueryFilters()
                     .FirstOrDefault(g => g.Email.ToLower() == email.ToLower());
 
                 if (gebruiker == null)
                 {
                     MessageBox.Show($"❌ Gebruiker niet gevonden:\n{email}",
                         "Debug Login", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return false;
+                }
+
+                if (!gebruiker.IsActief)
+                {
+                    MessageBox.Show(
+                        "Dit account is gedeactiveerd.\nNeem contact op met onze klantenservice als je het wilt heractiveren.",
+                        "Account gedeactiveerd",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
                     return false;
                 }
 
@@ -177,7 +188,7 @@ namespace BankApp_WPF
 
                 if (gebruiker.WachtwoordHash == ingevoerdeHash)
                 {
-                    // ✅ Zet de ingelogde gebruiker in de sessie
+                    //Zet de ingelogde gebruiker in de sessie
                     UserSession.IngelogdeGebruiker = gebruiker;
                     return true;
                 }

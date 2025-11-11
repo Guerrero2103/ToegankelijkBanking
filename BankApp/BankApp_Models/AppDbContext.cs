@@ -55,6 +55,8 @@ namespace BankApp_Models
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Gebruiker>().HasQueryFilter(g => g.IsActief);
+
             // === RELATIES ===
             modelBuilder.Entity<Rekening>()
                 .HasOne(r => r.Gebruiker)

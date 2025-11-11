@@ -155,11 +155,55 @@ namespace BankApp_WPF
         // 🚫 DeleteButton: voorlopig geen functionaliteit
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Profiel verwijderen is momenteel uitgeschakeld.",
-                            "Niet beschikbaar",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
+            if (_gebruiker == null)
+            {
+                MessageBox.Show("Geen actieve gebruiker gevonden.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var bevestiging = MessageBox.Show(
+                "Weet je zeker dat je je profiel wilt verwijderen?\n" +
+                "Je account wordt gedeactiveerd, maar je gegevens blijven bewaard voor administratie.",
+                "Bevestig verwijdering",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (bevestiging != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                using (var context = new AppDbContext())
+                {
+                    var gebruikerInDb = context.Gebruikers.FirstOrDefault(g => g.Id == _gebruiker.Id);
+
+                    if (gebruikerInDb == null)
+                    {
+                        MessageBox.Show("Gebruiker niet gevonden in database.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // ⚙️ Soft delete
+                    gebruikerInDb.IsActief = false;
+                    context.SaveChanges();
+                }
+
+                // 🧹 Clear sessie
+                UserSession.IngelogdeGebruiker = null;
+
+                MessageBox.Show("Je account is gedeactiveerd. Bedankt om onze bank te gebruiken!", "Account gedeactiveerd", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // 🔄 Terug naar loginpagina
+                LoginPagina login = new LoginPagina();
+                login.Show();
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Er is een fout opgetreden bij het verwijderen: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
 
         private string HashWachtwoord(string wachtwoord)
         {
