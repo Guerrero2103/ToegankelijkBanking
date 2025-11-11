@@ -136,19 +136,34 @@ namespace BankApp_WPF
             using (var context = new AppDbContext())
             {
                 var gebruiker = context.Gebruikers
-                    .Include(g => g.Rol)
-                    .Include(g => g.Rekeningen)
+                    .Include(g => g.Rol) // optioneel: rol mee laden
                     .FirstOrDefault(g => g.Email.ToLower() == email.ToLower());
 
                 if (gebruiker == null)
-                    return null;
+                    return false;
+                }
 
                 var ingevoerdeHash = HashWachtwoord(password);
 
+                // 🧩 Debug info in popup (alleen tijdelijk!)
+                /*string debugInfo =
+                    $"=== LOGIN DEBUG ===\n" +
+                    $"Email: {email}\n\n" +
+                    $"Wachtwoord: {password}\n\n" +
+                    $"Ingevoerde hash:\n{ingevoerdeHash}\n\n" +
+                    $"Database hash:\n{gebruiker.WachtwoordHash}\n\n" +
+                    $"Hash match? {(ingevoerdeHash == gebruiker.WachtwoordHash)}";
+
+                MessageBox.Show(debugInfo, "Login Debug Info", MessageBoxButton.OK, MessageBoxImage.Information);*/
+
                 if (gebruiker.WachtwoordHash == ingevoerdeHash)
-                    return gebruiker;
-                else
-                    return null;
+                {
+                    //Zet de ingelogde gebruiker in de sessie
+                    UserSession.IngelogdeGebruiker = gebruiker;
+                    return true;
+                }
+
+                return false;
             }
         }
 
