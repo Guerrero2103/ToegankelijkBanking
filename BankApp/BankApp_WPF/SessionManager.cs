@@ -2,20 +2,27 @@
 
 namespace BankApp_WPF
 {
+    // Compatibiliteitslaag tussen oudere "SessionManager" calls en huidige "UserSession"
     public static class SessionManager
     {
-        public static Gebruiker? CurrentUser { get; set; }
-
-        public static bool IsLoggedIn => CurrentUser != null;
+        public static void Login(Gebruiker gebruiker)
+        {
+            UserSession.IngelogdeGebruiker = gebruiker;
+        }
 
         public static void Logout()
         {
-            CurrentUser = null;
+            UserSession.LogUit();
         }
 
-        public static void Login(Gebruiker gebruiker)
+        // Backwards compatibility: sommige plaatsen gebruiken LogUit()
+        public static void LogUit()
         {
-            CurrentUser = gebruiker;
+            UserSession.LogUit();
         }
+
+        public static bool IsLoggedIn => UserSession.IsIngelogd;
+
+        public static Gebruiker? CurrentUser => UserSession.IngelogdeGebruiker;
     }
 }
