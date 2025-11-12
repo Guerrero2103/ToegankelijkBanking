@@ -1,76 +1,156 @@
 ﻿using BankApp_Models;
 using BankApp_BusinessLogic;
 using System.Linq;
-using System.Text;
 using System.Windows;
+using System;
 
 namespace BankApp_WPF
 {
     public partial class HoofdPagina : Window
     {
-        private readonly IRekeningService _rekeningService;
-
         public HoofdPagina()
         {
             InitializeComponent();
 
-            // Initialize database
             try
             {
-                using (var context = new AppDbContext())
+                Console.WriteLine("🔄 HoofdPagina wordt geladen...");
+
+                // Check of gebruiker is ingelogd
+                if (!UserSession.IsIngelogd)
                 {
-                    // Database.EnsureCreated() wordt al aangeroepen in de constructor
+                    MessageBox.Show("Je bent niet ingelogd.", "Fout",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                    LoginPagina loginPagina = new LoginPagina();
+                    loginPagina.Show();
+                    this.Close();
+                    return;
                 }
+
+                Console.WriteLine($"✅ Gebruiker ingelogd: {UserSession.IngelogdeGebruiker?.Email}");
+
+                // Initialize database
+                try
+                {
+                    using (var context = new AppDbContext())
+                    {
+                        Console.WriteLine("✅ Database context aangemaakt");
+                    }
+                }
+                catch (Exception dbEx)
+                {
+                    Console.WriteLine($"❌ Database fout: {dbEx.Message}");
+                    MessageBox.Show($"Database fout: {dbEx.Message}\n\n{dbEx.StackTrace}",
+                        "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw;
+                }
+
+                // Load user data
+                LoadUserData();
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                MessageBox.Show($"Fout bij aanmaken database: {ex.Message}");
+                Console.WriteLine($"❌ CRASH in HoofdPagina constructor: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+
+                MessageBox.Show(
+                    $"Er is een fout opgetreden bij het laden van de hoofdpagina:\n\n" +
+                    $"{ex.Message}\n\n" +
+                    $"Stack trace:\n{ex.StackTrace}",
+                    "Kritieke Fout",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                // Ga terug naar login
+                StartPagina startPagina = new StartPagina();
+                startPagina.Show();
+                this.Close();
             }
-
-            // Initialize services
-            var dbContext = new AppDbContext();
-            _rekeningService = new RekeningService(dbContext);
-
-            // Load user data
-            LoadUserData();
         }
 
         private async void LoadUserData()
         {
-            if (!UserSession.IsIngelogd)
-            {
-                MessageBox.Show("Je bent niet ingelogd.", "Fout",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
             try
             {
-                var gebruikerId = UserSession.IngelogdeGebruiker!.Id;
+                Console.WriteLine("🔄 LoadUserData gestart...");
 
-                // Haal rekeningen op; maak er één aan als er geen zijn
-                var rekeningen = await _rekeningService.GetRekeningenByGebruikerIdAsync(gebruikerId);
-                if (rekeningen == null || rekeningen.Count == 0)
+                if (!UserSession.IsIngelogd || UserSession.IngelogdeGebruiker == null)
                 {
-                    var nieuwe = await _rekeningService.MaakRekeningAanAsync(gebruikerId, RekeningType.Zicht);
-                    rekeningen = new System.Collections.Generic.List<Rekening> { nieuwe };
+                    Console.WriteLine("❌ Geen ingelogde gebruiker gevonden");
+                    MessageBox.Show("Gebruikerssessie is verlopen. Log opnieuw in.", "Fout",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                    LoginPagina loginPagina = new LoginPagina();
+                    loginPagina.Show();
+                    this.Close();
+                    return;
                 }
 
-                // Haal totaal saldo op
-                var totaalSaldo = await _rekeningService.GetTotaalSaldoAsync(gebruikerId);
-                lblTotalSaldo.Content = $"€{totaalSaldo:N2}";
+                var gebruikerId = UserSession.IngelogdeGebruiker.Id;
+                Console.WriteLine($"📋 Gebruiker ID: {gebruikerId}");
 
-                // Toon zichtrekening IBAN volledig. Gebruik de eerste zichtrekening of de eerste beschikbare.
-                var zichtRekening = rekeningen.FirstOrDefault(r => r.Type == RekeningType.Zicht) ?? rekeningen.First();
-                if (zichtRekening != null)
+                using (var context = new AppDbContext())
                 {
-                    lblAccountNumber.Content = $"Zichtrekening {zichtRekening.Iban}";
+                    var rekeningService = new RekeningService(context);
+
+                    // Haal rekeningen op
+                    Console.WriteLine("🔄 Rekeningen ophalen...");
+                    var rekeningen = await rekeningService.GetRekeningenByGebruikerIdAsync(gebruikerId);
+
+                    if (rekeningen == null)
+                    {
+                        Console.WriteLine("⚠️ Rekeningen is NULL");
+                        rekeningen = new System.Collections.Generic.List<Rekening>();
+                    }
+
+                    Console.WriteLine($"📊 Aantal rekeningen: {rekeningen.Count}");
+
+                    // Maak rekening aan als er geen zijn
+                    if (rekeningen.Count == 0)
+                    {
+                        Console.WriteLine("➕ Nieuwe zichtrekening aanmaken...");
+                        var nieuwe = await rekeningService.MaakRekeningAanAsync(gebruikerId, RekeningType.Zicht);
+                        rekeningen = new System.Collections.Generic.List<Rekening> { nieuwe };
+                        Console.WriteLine($"✅ Rekening aangemaakt: {nieuwe.Iban}");
+                    }
+
+                    // Haal totaal saldo op
+                    Console.WriteLine("🔄 Totaal saldo ophalen...");
+                    var totaalSaldo = await rekeningService.GetTotaalSaldoAsync(gebruikerId);
+                    Console.WriteLine($"💰 Totaal saldo: €{totaalSaldo}");
+
+                    // Update UI
+                    lblTotalSaldo.Content = $"€{totaalSaldo:N2}";
+
+                    // Toon zichtrekening info
+                    var zichtRekening = rekeningen.FirstOrDefault(r => r.Type == RekeningType.Zicht)
+                                        ?? rekeningen.First();
+
+                    if (zichtRekening != null)
+                    {
+                        lblAccountNumber.Content = $"Zichtrekening {zichtRekening.Iban}";
+                        Console.WriteLine($"✅ Zichtrekening: {zichtRekening.Iban}");
+                    }
+
+                    Console.WriteLine("✅ LoadUserData voltooid!");
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                MessageBox.Show($"Fout bij laden gegevens: {ex.Message}", "Fout",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine($"❌ Fout in LoadUserData: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+
+                MessageBox.Show(
+                    $"Fout bij laden gegevens:\n\n{ex.Message}\n\n" +
+                    $"Stack trace:\n{ex.StackTrace}",
+                    "Fout",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                // Zet standaard waarden
+                lblTotalSaldo.Content = "€0.00";
+                lblAccountNumber.Content = "Geen rekening";
             }
         }
 
@@ -81,49 +161,97 @@ namespace BankApp_WPF
 
         private void BtnViewSaldo_Click(object sender, RoutedEventArgs e)
         {
-            SaldoRaadplegenPagina saldoRaadplegenPagina = new SaldoRaadplegenPagina();
-            saldoRaadplegenPagina.Show();
-            this.Close();
+            try
+            {
+                SaldoRaadplegenPagina saldoRaadplegenPagina = new SaldoRaadplegenPagina();
+                saldoRaadplegenPagina.Show();
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout: {ex.Message}", "Fout",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void BtnInvest_Click(object sender, RoutedEventArgs e)
         {
-            SparenInvesteren sparenInvesteren = new SparenInvesteren();
-            sparenInvesteren.Show();
-            this.Close();
+            try
+            {
+                SparenInvesteren sparenInvesteren = new SparenInvesteren();
+                sparenInvesteren.Show();
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout: {ex.Message}", "Fout",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void BtnTransfer_Click(object sender, RoutedEventArgs e)
         {
-            OverschrijvingenPagina overschrijvingenPagina = new OverschrijvingenPagina();
-            overschrijvingenPagina.Show();
+            try
+            {
+                OverschrijvingenPagina overschrijvingenPagina = new OverschrijvingenPagina();
+                overschrijvingenPagina.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout: {ex.Message}", "Fout",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void BtnProfile_Click(object sender, RoutedEventArgs e)
         {
-            ProfilePage profilePage = new ProfilePage();
-            profilePage.Show();
-            this.Close();
+            try
+            {
+                ProfilePage profilePage = new ProfilePage();
+                profilePage.Show();
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout: {ex.Message}", "Fout",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void BtnContact_Click(object sender, RoutedEventArgs e)
         {
-            KlantendienstPagina klantendienstPagina = new KlantendienstPagina();
-            klantendienstPagina.Show();
-            this.Close();
+            try
+            {
+                KlantendienstPagina klantendienstPagina = new KlantendienstPagina();
+                klantendienstPagina.Show();
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout: {ex.Message}", "Fout",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void BtnLogout_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show("Weet je zeker dat je wilt uitloggen?",
-                "Uitloggen", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
+            try
             {
-                UserSession.LogUit();
-                StartPagina startPagina = new StartPagina();
-                startPagina.Show();
-                this.Close();
+                var result = MessageBox.Show("Weet je zeker dat je wilt uitloggen?",
+                    "Uitloggen", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    UserSession.LogUit();
+                    StartPagina startPagina = new StartPagina();
+                    startPagina.Show();
+                    this.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout: {ex.Message}", "Fout",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

@@ -8,9 +8,6 @@ namespace BankApp_WPF
 {
     public partial class OverschrijvingenPagina : Window
     {
-        private readonly ITransactieService _transactieService;
-        private readonly IRekeningService _rekeningService;
-
         public OverschrijvingenPagina()
         {
             InitializeComponent();
@@ -22,10 +19,6 @@ namespace BankApp_WPF
                 this.Close();
                 return;
             }
-
-            var context = new AppDbContext();
-            _transactieService = new TransactieService(context);
-            _rekeningService = new RekeningService(context);
         }
 
         private void BtnTerug_Click(object sender, RoutedEventArgs e)
@@ -45,6 +38,7 @@ namespace BankApp_WPF
 
         private async void BtnVerzenden_Click(object sender, RoutedEventArgs e)
         {
+            // Validaties
             if (string.IsNullOrWhiteSpace(txtIban.Text))
             {
                 MessageBox.Show("Voer een IBAN in.", "Validatiefout",
@@ -88,47 +82,55 @@ namespace BankApp_WPF
 
             try
             {
-                var gebruikerId = SessionManager.CurrentUser!.Id;
-                var gebruikerRekeningen = await _rekeningService
-                    .GetRekeningenByGebruikerIdAsync(gebruikerId);
-
-                var vanRekening = gebruikerRekeningen
-                    .FirstOrDefault(r => r.Type == RekeningType.Zicht);
-
-                if (vanRekening == null)
+                // ✅ Maak een NIEUWE context aan voor deze transactie
+                using (var context = new AppDbContext())
                 {
-                    MessageBox.Show("Je hebt geen zichtrekening.",
-                        "Geen rekening", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
+                    var transactieService = new TransactieService(context);
+                    var rekeningService = new RekeningService(context);
 
-                var (succes, bericht, transactie) = await _transactieService.MaakOverschrijvingAsync(
-                    vanIban: vanRekening.Iban,
-                    naarIban: naarIban,
-                    bedrag: bedrag,
-                    omschrijving: txtOmschrijving.Text.Trim(),
-                    gebruikerId: gebruikerId
-                );
+                    var gebruikerId = SessionManager.CurrentUser!.Id;
+                    var gebruikerRekeningen = await rekeningService
+                        .GetRekeningenByGebruikerIdAsync(gebruikerId);
 
-                if (succes)
-                {
-                    MessageBox.Show(
-                        $"✅ Overschrijving succesvol!\n\n" +
-                        $"Bedrag: €{bedrag:N2}\n" +
-                        $"Naar: {txtNaamOntvanger.Text}",
-                        "Succes",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                    var vanRekening = gebruikerRekeningen
+                        .FirstOrDefault(r => r.Type == RekeningType.Zicht);
 
-                    txtIban.Clear();
-                    txtNaamOntvanger.Clear();
-                    txtBedrag.Clear();
-                    txtOmschrijving.Clear();
-                }
-                else
-                {
-                    MessageBox.Show($"❌ {bericht}", "Fout",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    if (vanRekening == null)
+                    {
+                        MessageBox.Show("Je hebt geen zichtrekening.",
+                            "Geen rekening", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var (succes, bericht, transactie) = await transactieService.MaakOverschrijvingAsync(
+                        vanIban: vanRekening.Iban,
+                        naarIban: naarIban,
+                        bedrag: bedrag,
+                        omschrijving: txtOmschrijving.Text.Trim(),
+                        gebruikerId: gebruikerId
+                    );
+
+                    if (succes)
+                    {
+                        MessageBox.Show(
+                            $"✅ Overschrijving succesvol!\n\n" +
+                            $"Bedrag: €{bedrag:N2}\n" +
+                            $"Naar: {txtNaamOntvanger.Text}\n\n" +
+                            $"Je nieuwe saldo wordt bijgewerkt.",
+                            "Succes",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+
+                        txtIban.Clear();
+                        txtNaamOntvanger.Clear();
+                        txtBedrag.Clear();
+                        txtOmschrijving.Clear();
+                    }
+                    else
+                    {
+                        MessageBox.Show($"❌ {bericht}", "Fout",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
             catch (Exception ex)

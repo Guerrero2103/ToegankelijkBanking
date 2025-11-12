@@ -1,6 +1,6 @@
-﻿using System.Windows;
+﻿using BankApp_Models;
 using BankApp_WPF;
-
+using System.Windows;
 
 namespace BankApp_WPF
 {
@@ -10,8 +10,8 @@ namespace BankApp_WPF
         {
             InitializeComponent();
 
-            MainFrame.Navigate(new HoofdPagina()); 
-
+            // Navigeer naar StartPagina in plaats van HoofdPagina
+            MainFrame.Navigate(new StartPagina());
         }
     }
 }
