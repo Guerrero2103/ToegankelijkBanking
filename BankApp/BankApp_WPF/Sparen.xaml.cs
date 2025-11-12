@@ -49,15 +49,40 @@ namespace BankApp_WPF
 
                     // Vul de ObservableCollection
                     Spaarrekeningen.Clear();
-                    foreach (var rekening in spaarrekeningen)
+
+                    // Als er spaarrekeningen zijn in database, toon die
+                    if (spaarrekeningen.Count > 0)
                     {
-                        Spaarrekeningen.Add(rekening);
+                        foreach (var rekening in spaarrekeningen)
+                        {
+                            Spaarrekeningen.Add(rekening);
+                        }
+                        Console.WriteLine($"✅ {spaarrekeningen.Count} spaarrekeningen geladen uit database");
+                    }
+                    else
+                    {
+                        // Geen spaarrekeningen gevonden, toon voorbeeld data voor test
+                        Spaarrekeningen.Add(new Rekening
+                        {
+                            Id = 1,
+                            Iban = "BE12 3456 7890 1234",
+                            Type = RekeningType.Spaar,
+                            Saldo = 5000.00m,
+                            GebruikerId = 1
+                        });
+                        Spaarrekeningen.Add(new Rekening
+                        {
+                            Id = 2,
+                            Iban = "BE98 7654 3210 9876",
+                            Type = RekeningType.Spaar,
+                            Saldo = 12500.50m,
+                            GebruikerId = 1
+                        });
+                        Console.WriteLine("⚠️ Geen spaarrekeningen in database - voorbeeld data getoond");
                     }
 
                     // Bind aan de ItemsControl in XAML
                     SpaarrekiningenListBox.ItemsSource = Spaarrekeningen;
-
-                    Console.WriteLine($"✅ {spaarrekeningen.Count} spaarrekeningen geladen");
                 }
             }
             catch (Exception ex)

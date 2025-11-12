@@ -8,120 +8,121 @@
         WindowState="Maximized"
         Background="#000000">
 
-	<Window.Resources>
-		<!-- Gele knopstijl -->
-		<Style x:Key="YellowButton" TargetType="Button">
-			<Setter Property="FontSize" Value="20"/>
-			<Setter Property="FontWeight" Value="Bold"/>
-			<Setter Property="Foreground" Value="Black"/>
-			<Setter Property="Background" Value="#FFD700"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Cursor" Value="Hand"/>
-			<Setter Property="Height" Value="70"/>
-			<Setter Property="Template">
-				<Setter.Value>
-					<ControlTemplate TargetType="Button">
-						<Border Background="{TemplateBinding Background}"
+    <Window.Resources>
+        <!-- Gele knopstijl -->
+        <Style x:Key="YellowButton" TargetType="Button">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="#FFD700"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="70"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
                                 CornerRadius="10"
                                 Padding="15">
-							<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-						</Border>
-						<ControlTemplate.Triggers>
-							<Trigger Property="IsMouseOver" Value="True">
-								<Setter Property="Opacity" Value="0.9"/>
-							</Trigger>
-							<Trigger Property="IsPressed" Value="True">
-								<Setter Property="Opacity" Value="0.8"/>
-							</Trigger>
-						</ControlTemplate.Triggers>
-					</ControlTemplate>
-				</Setter.Value>
-			</Setter>
-		</Style>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-		<!-- Stijl voor elke spaarrekening-kaart -->
-		<Style x:Key="SpaarCard" TargetType="Border">
-			<Setter Property="CornerRadius" Value="15"/>
-			<Setter Property="Padding" Value="30"/>
-			<Setter Property="Margin" Value="0,20,0,20"/>
-			<Setter Property="Background" Value="#000000"/>
-			<Setter Property="BorderBrush" Value="#00FF99"/>
-			<Setter Property="BorderThickness" Value="2"/>
-			<Setter Property="MaxWidth" Value="700"/>
-			<Setter Property="HorizontalAlignment" Value="Center"/>
-		</Style>
-	</Window.Resources>
+        <!-- Stijl voor elke spaarrekening-kaart -->
+        <Style x:Key="SpaarCard" TargetType="Border">
+            <Setter Property="CornerRadius" Value="15"/>
+            <Setter Property="Padding" Value="30"/>
+            <Setter Property="Margin" Value="0,20,0,20"/>
+            <Setter Property="Background" Value="#000000"/>
+            <Setter Property="BorderBrush" Value="#00FF99"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="MaxWidth" Value="700"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
 
-	<ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,0">
-		<StackPanel HorizontalAlignment="Center" Margin="40">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,0">
+        <StackPanel HorizontalAlignment="Center" Margin="40">
 
-			<TextBlock Text="Mijn Spaarrekeningen"
+            <TextBlock Text="Mijn Spaarrekeningen"
                        FontSize="36"
                        FontWeight="Bold"
                        Foreground="White"
                        Margin="0,20,0,30"/>
 
-			<!-- Dynamische lijst van spaarrekeningen met data binding -->
-			<ItemsControl x:Name="SpaarrekiningenListBox">
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<Border Style="{StaticResource SpaarCard}" BorderBrush="#00FF99">
-							<StackPanel>
-								<!-- Titel met emoji -->
-								<StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-									<TextBlock Text="💰" FontSize="26" Margin="0,0,10,0"/>
-									<TextBlock FontSize="22"
+            <!-- Dynamische lijst van spaarrekeningen met data binding -->
+            <ItemsControl x:Name="SpaarrekiningenListBox">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource SpaarCard}" BorderBrush="#00FF99">
+                            <StackPanel>
+                                <!-- Titel met emoji -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20" HorizontalAlignment="Left">
+                                    <TextBlock Text="💰" FontSize="26" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                    <TextBlock FontSize="22"
                                                FontWeight="Bold"
-                                               Foreground="White">
+                                               Foreground="White"
+                                               VerticalAlignment="Center">
 										<Run Text="Spaarrekening #"/>
 										<Run Text="{Binding Id}"/>
-									</TextBlock>
-								</StackPanel>
+                                    </TextBlock>
+                                </StackPanel>
 
-								<!-- Saldo met data binding -->
-								<Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="15" Margin="0,0,0,10">
-									<StackPanel>
-										<TextBlock Text="Saldo:" Foreground="LightGray" FontSize="14"/>
-										<TextBlock FontSize="36"
+                                <!-- Saldo met data binding -->
+                                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="15" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Saldo:" Foreground="LightGray" FontSize="14"/>
+                                        <TextBlock FontSize="36"
                                                    FontWeight="Bold"
                                                    Foreground="White">
 											<Run Text="€ "/>
 											<Run Text="{Binding Saldo, StringFormat=N2}"/>
-										</TextBlock>
-									</StackPanel>
-								</Border>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
 
-								<!-- IBAN met data binding -->
-								<Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="15" Margin="0,0,0,20">
-									<StackPanel>
-										<TextBlock Text="Bankrekeningnummer (IBAN):"
+                                <!-- IBAN met data binding -->
+                                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="15" Margin="0,0,0,20">
+                                    <StackPanel>
+                                        <TextBlock Text="Bankrekeningnummer (IBAN):"
                                                    Foreground="LightGray" FontSize="14"/>
-										<TextBlock Text="{Binding Iban}"
+                                        <TextBlock Text="{Binding Iban}"
                                                    FontSize="20"
                                                    FontWeight="SemiBold"
                                                    Foreground="White"
                                                    Margin="0,5,0,0"/>
-									</StackPanel>
-								</Border>
+                                    </StackPanel>
+                                </Border>
 
-								<!-- Kopieer knop met event handler en Tag binding -->
-								<Button Content="📋 Kopieer IBAN"
+                                <!-- Kopieer knop met event handler en Tag binding -->
+                                <Button Content="📋 Kopieer IBAN"
                                         Style="{StaticResource YellowButton}"
                                         Click="BtnKopieerIban_Click"
                                         Tag="{Binding Iban}"/>
-							</StackPanel>
-						</Border>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
 
-			<!-- Terugknop onderaan met event handler -->
-			<Button Content="← Terug"
+            <!-- Terugknop onderaan met event handler -->
+            <Button Content="← Terug"
                     Style="{StaticResource YellowButton}"
                     Width="250"
                     Margin="0,40,0,20"
                     HorizontalAlignment="Center"
                     Click="BtnTerug_Click"/>
-		</StackPanel>
-	</ScrollViewer>
+        </StackPanel>
+    </ScrollViewer>
 </Window>

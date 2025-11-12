@@ -34,6 +34,7 @@ namespace BankApp_WPF
             InitializeComponent();
             Klanten = new System.Collections.ObjectModel.ObservableCollection<Gebruiker>();
             LaadKlanten(); // Laad klanten bij opstarten
+            LaadKaarten(); // Laad kaarten voor Kaarten tab
         }
 
         // Laad alle klanten uit de database
@@ -72,6 +73,35 @@ namespace BankApp_WPF
             }
         }
 
+
+        // Laad alle kaarten voor de Kaarten tab
+        private void LaadKaarten()
+        {
+            try
+            {
+                using (var context = new AppDbContext())
+                {
+                    // Haal alle kaarten op met hun gebruikers
+                    var kaarten = context.Kaarten
+                        .Include(k => k.Gebruiker)
+                        .ToList();
+
+                    // Update de ListBox
+                    KaartenListBox.ItemsSource = kaarten;
+
+                    // Update de teller in de UI
+                    KaartenTellerTextBlock.Text = $"Kaart beheer - Card Stop ({kaarten.Count})";
+
+                    Console.WriteLine($"✅ Kaarten tab: {kaarten.Count} kaarten geladen");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout bij laden kaarten: {ex.Message}",
+                    "Database Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void BtnTerug_Click(object sender, RoutedEventArgs e)
         {
             MainWindow mainWindow = new MainWindow();
@@ -105,61 +135,19 @@ namespace BankApp_WPF
             {
                 using (var context = new AppDbContext())
                 {
-                    // Controleer of het een nieuwe klant is of een bestaande klant wordt bijgewerkt
-                    if (string.IsNullOrEmpty(CustomerIdTextBox.Text))
-                    {
-                        // NIEUWE KLANT TOEVOEGEN
+                    // Controleer of het een update of nieuwe klant is
+                    bool isUpdate = !string.IsNullOrEmpty(CustomerIdTextBox.Text);
 
-                        // Bepaal rol (standaard Klant = 1)
-                        int rolId = 1; // Klant
-                        if (RoleComboBox.SelectedIndex == 1)
-                        {
-                            rolId = 3; // Beheerder
-                        }
-
-                        // Hash het wachtwoord (simpel voor nu)
-                        string passwordHash = HashPassword(PasswordBox.Password);
-
-                        // Maak nieuwe gebruiker aan
-                        var nieuweGebruiker = new Gebruiker
-                        {
-                            Email = EmailTextBox.Text.Trim(),
-                            WachtwoordHash = passwordHash,
-                            Telefoonnummer = PhoneNumberTextBox.Text.Trim(),
-                            Geboortedatum = BirthDatePicker.SelectedDate.Value,
-                            Straatnaam = StreetNameTextBox.Text.Trim(),
-                            Huisnummer = HouseNumberTextBox.Text.Trim(),
-                            Bus = BusTextBox.Text.Trim(),
-                            Postcode = PostcodeTextBox.Text.Trim(),
-                            Gemeente = CityTextBox.Text.Trim(),
-                            Land = CountryTextBox.Text.Trim(),
-                            RolId = rolId
-                        };
-
-                        // Voeg toe aan database
-                        context.Gebruikers.Add(nieuweGebruiker);
-                        context.SaveChanges();
-
-                        MessageBox.Show($"Nieuwe klant toegevoegd!\n\n" +
-                            $"Email: {EmailTextBox.Text}\n" +
-                            $"ID: {nieuweGebruiker.Id}",
-                            "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                        // Form leegmaken na toevoegen
-                        ClearForm();
-                        LaadKlanten(); // Herlaad klanten lijst
-                    }
-                    else
+                    if (isUpdate)
                     {
                         // BESTAANDE KLANT BIJWERKEN
                         int customerId = int.Parse(CustomerIdTextBox.Text);
-
-                        // Zoek gebruiker in database
                         var gebruiker = context.Gebruikers.Find(customerId);
 
                         if (gebruiker != null)
                         {
                             // Update gegevens
+                            // Voornaam en Achternaam worden niet opgeslagen (alleen visueel in formulier)
                             gebruiker.Email = EmailTextBox.Text.Trim();
                             gebruiker.Telefoonnummer = PhoneNumberTextBox.Text.Trim();
                             gebruiker.Geboortedatum = BirthDatePicker.SelectedDate.Value;
@@ -203,6 +191,49 @@ namespace BankApp_WPF
                                 "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
+                    else
+                    {
+                        // NIEUWE KLANT TOEVOEGEN
+                        // Bepaal rol (standaard Klant = 1)
+                        int rolId = 1; // Klant
+                        if (RoleComboBox.SelectedIndex == 1)
+                        {
+                            rolId = 3; // Beheerder
+                        }
+
+                        // Hash het wachtwoord (simpel voor nu)
+                        string passwordHash = HashPassword(PasswordBox.Password);
+
+                        // Maak nieuwe gebruiker aan
+                        var nieuweGebruiker = new Gebruiker
+                        {
+                            // Voornaam en Achternaam worden niet opgeslagen (alleen visueel in formulier)
+                            Email = EmailTextBox.Text.Trim(),
+                            WachtwoordHash = passwordHash,
+                            Telefoonnummer = PhoneNumberTextBox.Text.Trim(),
+                            Geboortedatum = BirthDatePicker.SelectedDate.Value,
+                            Straatnaam = StreetNameTextBox.Text.Trim(),
+                            Huisnummer = HouseNumberTextBox.Text.Trim(),
+                            Bus = BusTextBox.Text.Trim(),
+                            Postcode = PostcodeTextBox.Text.Trim(),
+                            Gemeente = CityTextBox.Text.Trim(),
+                            Land = CountryTextBox.Text.Trim(),
+                            RolId = rolId
+                        };
+
+                        // Voeg toe aan database
+                        context.Gebruikers.Add(nieuweGebruiker);
+                        context.SaveChanges();
+
+                        MessageBox.Show($"Nieuwe klant toegevoegd!\n\n" +
+                            $"Email: {EmailTextBox.Text}\n" +
+                            $"ID: {nieuweGebruiker.Id}",
+                            "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        // Form leegmaken na toevoegen
+                        ClearForm();
+                        LaadKlanten(); // Herlaad klanten lijst
+                    }
                 }
             }
             catch (Exception ex)
@@ -226,14 +257,7 @@ namespace BankApp_WPF
 
 
 
-        // Annuleren - form leegmaken
-        private void BtnAnnuleren_Click(object sender, RoutedEventArgs e)
-        {
-            ClearForm();
-        }
-
-
-        // Bewerken - klantgegevens laden in form
+        // Bewerken - laad klant gegevens in formulier voor bewerken
         private void BtnBewerken_Click(object sender, RoutedEventArgs e)
         {
             Button btn = (Button)sender;
@@ -252,6 +276,9 @@ namespace BankApp_WPF
                     {
                         // Vul formulier met gebruikersgegevens
                         CustomerIdTextBox.Text = gebruiker.Id.ToString();
+                        // Voornaam en Achternaam zijn niet in database, leeg laten
+                        FirstNameTextBox.Text = "";
+                        LastNameTextBox.Text = "";
                         EmailTextBox.Text = gebruiker.Email;
                         PhoneNumberTextBox.Text = gebruiker.Telefoonnummer ?? "";
                         BirthDatePicker.SelectedDate = gebruiker.Geboortedatum;
@@ -275,8 +302,20 @@ namespace BankApp_WPF
                         // Verander knop tekst naar "Bijwerken"
                         SaveCustomerButton.Content = "✓ Klant bijwerken";
 
-                        MessageBox.Show($"Klant {customerId} geladen voor bewerken",
-                            "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                        // Ga naar Klanten tab
+                        // Zoek de TabControl en selecteer eerste tab (Klanten)
+                        var mainGrid = this.Content as Grid;
+                        if (mainGrid != null)
+                        {
+                            var tabControl = mainGrid.Children.OfType<TabControl>().FirstOrDefault();
+                            if (tabControl != null)
+                            {
+                                tabControl.SelectedIndex = 0; // Eerste tab = Klanten
+                            }
+                        }
+
+                        MessageBox.Show($"Klant {customerId} geladen voor bewerken.\n\nGa naar Klanten tab om te bewerken.",
+                            "Klant Bewerken", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     else
                     {
@@ -344,13 +383,18 @@ namespace BankApp_WPF
 
 
 
+        // Annuleren knop - leeg formulier
+        private void BtnAnnuleren_Click(object sender, RoutedEventArgs e)
+        {
+            ClearForm();
+        }
+
         // Helper methode: form leegmaken
         private void ClearForm()
         {
-            CustomerIdTextBox.Text = "";
+            CustomerIdTextBox.Text = ""; // Leeg maken voor nieuwe klant
             EmailTextBox.Clear();
             PasswordBox.Clear();
-            ConfirmPasswordBox.Clear();
             PhoneNumberTextBox.Clear();
             BirthDatePicker.SelectedDate = null;
             StreetNameTextBox.Clear();
@@ -360,113 +404,63 @@ namespace BankApp_WPF
             CityTextBox.Clear();
             CountryTextBox.Text = "België";
             RoleComboBox.SelectedIndex = -1;
+            FirstNameTextBox.Clear();
+            LastNameTextBox.Clear();
 
             // Verander knop tekst terug naar "Toevoegen"
             SaveCustomerButton.Content = "👤 Klant toevoegen";
-
-            MessageBox.Show("Formulier is geleegd.", "Info",
-                MessageBoxButton.OK, MessageBoxImage.Information);
         }
-
-
-
-        // ========== GEBRUIKERS TAB - Event Handlers ==========
-
-        // Wijzig rol naar Klant
-        private void BtnWijzigNaarKlant_Click(object sender, RoutedEventArgs e)
-        {
-            Button btn = (Button)sender;
-            int userId = int.Parse(btn.Tag.ToString());
-
-            var result = MessageBox.Show(
-                $"Rol van gebruiker {userId} wijzigen naar Klant?",
-                "Bevestigen",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                try
-                {
-                    using (var context = new AppDbContext())
-                    {
-                        // Zoek gebruiker
-                        var gebruiker = context.Gebruikers.Find(userId);
-
-                        if (gebruiker != null)
-                        {
-                            // Update rol naar Klant (RolId = 1)
-                            gebruiker.RolId = 1;
-                            context.SaveChanges();
-
-                            MessageBox.Show($"Gebruiker {userId} rol is gewijzigd naar Klant!",
-                                "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Gebruiker niet gevonden!",
-                                "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Fout bij wijzigen rol: {ex.Message}",
-                        "Database Fout", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-        // Wijzig rol naar Admin
-        private void BtnWijzigNaarAdmin_Click(object sender, RoutedEventArgs e)
-        {
-            Button btn = (Button)sender;
-            int userId = int.Parse(btn.Tag.ToString());
-
-            var result = MessageBox.Show(
-                $"Rol van gebruiker {userId} wijzigen naar Admin?",
-                "Bevestigen",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                try
-                {
-                    using (var context = new AppDbContext())
-                    {
-                        // Zoek gebruiker
-                        var gebruiker = context.Gebruikers.Find(userId);
-
-                        if (gebruiker != null)
-                        {
-                            // Update rol naar Beheerder (RolId = 3)
-                            gebruiker.RolId = 3;
-                            context.SaveChanges();
-
-                            MessageBox.Show($"Gebruiker {userId} rol is gewijzigd naar Admin!",
-                                "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Gebruiker niet gevonden!",
-                                "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Fout bij wijzigen rol: {ex.Message}",
-                        "Database Fout", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-
 
 
 
         //   KAARTEN TAB - Event Handlers ==========
+
+        // Kaart actief maken
+        private void BtnActiefMaken_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = (Button)sender;
+            int cardId = int.Parse(btn.Tag.ToString());
+
+            var result = MessageBox.Show(
+                $"Kaart {cardId} actief maken?",
+                "Bevestigen",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    using (var context = new AppDbContext())
+                    {
+                        // Zoek kaart in database
+                        var kaart = context.Kaarten.Find(cardId);
+
+                        if (kaart != null)
+                        {
+                            // Update status naar Actief
+                            kaart.Status = KaartStatus.Actief;
+                            context.SaveChanges();
+
+                            MessageBox.Show($"Kaart {cardId} is actief gemaakt!",
+                                "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                            LaadKaarten(); // Herlaad kaarten lijst
+                        }
+                        else
+                        {
+                            MessageBox.Show("Kaart niet gevonden!",
+                                "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Fout bij actief maken kaart: {ex.Message}",
+                        "Database Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
 
         //   Kaart bevriezen
         private void BtnBevriezen_Click(object sender, RoutedEventArgs e)
@@ -497,6 +491,8 @@ namespace BankApp_WPF
 
                             MessageBox.Show($"Kaart {cardId} is bevroren!",
                                 "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                            LaadKaarten(); // Herlaad kaarten lijst
                         }
                         else
                         {
@@ -543,6 +539,8 @@ namespace BankApp_WPF
 
                             MessageBox.Show($"Kaart {cardId} is geblokkeerd!",
                                 "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                            LaadKaarten(); // Herlaad kaarten lijst
                         }
                         else
                         {
@@ -554,101 +552,6 @@ namespace BankApp_WPF
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Fout bij blokkeren kaart: {ex.Message}",
-                        "Database Fout", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-        // AANVRAGEN TAB - Event Handlers 
-
-        // Aanvraag goedkeuren
-        private void BtnGoedkeuren_Click(object sender, RoutedEventArgs e)
-        {
-            Button btn = (Button)sender;
-            int requestId = int.Parse(btn.Tag.ToString());
-
-            var result = MessageBox.Show(
-                $"Aanvraag {requestId} goedkeuren?",
-                "Bevestigen",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                try
-                {
-                    using (var context = new AppDbContext())
-                    {
-                        // Zoek afspraak in database
-                        var afspraak = context.Afspraken.Find(requestId);
-
-                        if (afspraak != null)
-                        {
-                            // Update status naar Goedgekeurd
-                            afspraak.Status = AfspraakStatus.Goedgekeurd;
-                            context.SaveChanges();
-
-                            MessageBox.Show($"Aanvraag {requestId} is goedgekeurd! ✓",
-                                "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Aanvraag niet gevonden!",
-                                "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Fout bij goedkeuren aanvraag: {ex.Message}",
-                        "Database Fout", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-        // Aanvraag afwijzen
-        private void BtnAfwijzen_Click(object sender, RoutedEventArgs e)
-        {
-            Button btn = (Button)sender;
-            int requestId = int.Parse(btn.Tag.ToString());
-
-            var result = MessageBox.Show(
-                $"Aanvraag {requestId} afwijzen?",
-                "Bevestigen",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                try
-                {
-                    using (var context = new AppDbContext())
-                    {
-                        // Zoek afspraak in database
-                        var afspraak = context.Afspraken.Find(requestId);
-
-
-
-                        if (afspraak != null)
-                        {
-                            // Update status naar Geannuleerd
-                            afspraak.Status = AfspraakStatus.Geannuleerd;
-                            context.SaveChanges();
-
-
-                            MessageBox.Show($"Aanvraag {requestId} is afgewezen! ✕",
-                                "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Aanvraag niet gevonden!",
-                                "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Fout bij afwijzen aanvraag: {ex.Message}",
                         "Database Fout", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
