@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-
 namespace BankApp_WPF
 {
     public partial class Sparen : Window
@@ -20,6 +19,24 @@ namespace BankApp_WPF
         public Sparen()
         {
             InitializeComponent();
+            this.KeyDown += Window_KeyDown;
+            this.Focusable = true;
+            this.Focus();
+        }
+        // Z Toets Handler - Voeg toe aan ELKE window
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Z)
+            {
+                e.Handled = true;
+
+                // Open specifiek venster bij indrukken van Z
+                SparenInvesteren sparenInvesteren = new SparenInvesteren();
+                sparenInvesteren.Show();
+
+                // Sluit huidige venster
+                this.Close();
+            }
         }
 
         private void BtnKopieerVakantie_Click(object sender, RoutedEventArgs e)

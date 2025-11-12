@@ -1,9 +1,10 @@
-﻿using System;
+﻿using BankApp_Models;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
-using BankApp_Models;
-using Microsoft.EntityFrameworkCore;
+using System.Windows.Input;
 
 namespace BankApp_WPF
 {
@@ -13,6 +14,24 @@ namespace BankApp_WPF
         {
             InitializeComponent();
             LandBox.Text = "België";
+            this.KeyDown += Window_KeyDown;
+            this.Focusable = true;
+            this.Focus();
+        }
+        // Z Toets Handler - Voeg toe aan ELKE window
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Z)
+            {
+                e.Handled = true;
+
+                // Open specifiek venster bij indrukken van Z
+                StartPagina startPagina = new StartPagina();
+                startPagina.Show();
+
+                // Sluit huidige venster
+                this.Close();
+            }
         }
 
         private void RegistreerBtn_Click(object sender, RoutedEventArgs e)

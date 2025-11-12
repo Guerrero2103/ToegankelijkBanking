@@ -21,11 +21,34 @@ namespace BankApp_WPF
         public InvesteringenPagina()
         {
             InitializeComponent();
+            this.KeyDown += Window_KeyDown;
+            this.Focusable = true;
+            this.Focus();
         }
+        // Z Toets Handler - Voeg toe aan ELKE window
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Z)
+            {
+                e.Handled = true;
 
+                // Open specifiek venster bij indrukken van Z
+                SparenInvesteren sparenInvesteren = new SparenInvesteren();
+                sparenInvesteren.Show();
+
+                // Sluit huidige venster
+                this.Close();
+            }
+        }
         // Terug knop - sluit het huidige venster
         private void BtnTerug_Click(object sender, RoutedEventArgs e)
         {
+
+            // Open specifiek venster bij indrukken van Z
+            SparenInvesteren sparenInvesteren = new SparenInvesteren();
+            sparenInvesteren.Show();
+
+            // Sluit huidige venster
             this.Close();
         }
 

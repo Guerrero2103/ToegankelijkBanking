@@ -221,6 +221,9 @@ public partial class SaldoRaadplegenPagina : Window
 
     private void BtnBack_Click(object sender, RoutedEventArgs e)
     {
+        // Open specifiek venster bij indrukken van Z
+        HoofdPagina hoofdPagina = new HoofdPagina();
+        hoofdPagina.Show();
         this.Close();
     }
 
@@ -229,7 +232,12 @@ public partial class SaldoRaadplegenPagina : Window
         // Global keyboard shortcut: Z to go back
         if (e.Key == Key.Z)
         {
-            e.Handled = true;
+
+            // Open specifiek venster bij indrukken van Z
+            HoofdPagina hoofdPagina = new HoofdPagina();
+            hoofdPagina.Show();
+
+            // Sluit huidige venster
             this.Close();
         }
     }

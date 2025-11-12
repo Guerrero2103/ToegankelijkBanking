@@ -117,8 +117,8 @@ namespace BankApp_WPF
         // 🔙 Terug naar startpagina
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
-            HoofdPagina hoofdPagina = new HoofdPagina();
-            hoofdPagina.Show();
+            StartPagina startPagina = new StartPagina();
+            startPagina.Show();
             this.Close();
         }
 
@@ -127,6 +127,20 @@ namespace BankApp_WPF
         {
             if (e.Key == Key.Escape)
                 BtnBack_Click(sender, e);
+        
+
+            if (e.Key == Key.Z)
+            {
+                e.Handled = true;
+
+                // Open specifiek venster bij indrukken van Z
+                StartPagina startPagina = new StartPagina();
+                startPagina.Show();
+
+                // Sluit huidige venster
+                this.Close();
+
+            }
         }
 
         // Helper-methoden
