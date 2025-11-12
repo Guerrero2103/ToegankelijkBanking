@@ -1,67 +1,137 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using BankApp_BusinessLogic;
+using BankApp_Models;
 
 namespace BankApp_WPF;
 
 public partial class SaldoRaadplegenPagina : Window
 {
     private bool _voiceEnabled = true;
+    private readonly IRekeningService _rekeningService;
+    private readonly ITransactieService _transactieService;
 
     public SaldoRaadplegenPagina()
     {
         InitializeComponent();
-        LoadMockData();
+
+        // Initialize services
+        var context = new AppDbContext();
+        _rekeningService = new RekeningService(context);
+        _transactieService = new TransactieService(context);
+
+        // Load real data
+        LoadRealData();
     }
 
-    private void LoadMockData()
+    private async void LoadRealData()
     {
-        // Mock Balance Data
-        lblCurrentBalance.Content = "€ 12.847,50";
-        lblAccountInfo.Content = "Zichtrekening •••• 4892";
+        if (!SessionManager.IsLoggedIn)
+        {
+            MessageBox.Show("Je moet ingelogd zijn om je saldo te bekijken.",
+                "Niet ingelogd", MessageBoxButton.OK, MessageBoxImage.Warning);
+            this.Close();
+            return;
+        }
 
-        txtBalanceChangeIcon.Text = "📈";
-        lblBalanceChange.Content = "+ € 1.197,50 (+10.3%)";
-        lblBalanceChange.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4ADE80"));
+        try
+        {
+            var gebruikerId = SessionManager.CurrentUser!.Id;
 
-        // Mock Transactions
-        LoadMockTransactions();
+            // Haal rekeningen en totaal saldo op
+            var rekeningen = await _rekeningService.GetRekeningenByGebruikerIdAsync(gebruikerId);
+            var totaalSaldo = await _rekeningService.GetTotaalSaldoAsync(gebruikerId);
+
+            // Update saldo display
+            lblCurrentBalance.Content = $"€ {totaalSaldo:N2}";
+
+            // Toon eerste zichtrekening info
+            if (rekeningen.Any())
+            {
+                var hoofdRekening = rekeningen.FirstOrDefault(r => r.Type == RekeningType.Zicht);
+                if (hoofdRekening != null)
+                {
+                    string maskedIban = hoofdRekening.Iban.Length > 4
+                        ? "•••• " + hoofdRekening.Iban.Substring(hoofdRekening.Iban.Length - 4)
+                        : hoofdRekening.Iban;
+                    lblAccountInfo.Content = $"Zichtrekening {maskedIban}";
+                }
+            }
+
+            // TODO: Bereken saldoverandering (vereist historische data)
+            // Voor nu: dummy waardes
+            txtBalanceChangeIcon.Text = totaalSaldo > 1000 ? "📈" : "📉";
+            lblBalanceChange.Content = totaalSaldo > 1000
+                ? "+ € 197,50 (+2.3%)"
+                : "- € 50,00 (-0.5%)";
+            lblBalanceChange.Foreground = new SolidColorBrush(
+                (Color)ColorConverter.ConvertFromString(totaalSaldo > 1000 ? "#4ADE80" : "#F87171"));
+
+            // Haal transacties op
+            var transacties = await _transactieService.GetTransactiesByGebruikerIdAsync(gebruikerId, 10);
+
+            if (transacties.Any())
+            {
+                LoadTransactions(transacties, rekeningen);
+            }
+            else
+            {
+                TransactionsPanel.Children.Add(new TextBlock
+                {
+                    Text = "Nog geen transacties beschikbaar.",
+                    FontSize = 18,
+                    Foreground = Brushes.Gray,
+                    Margin = new Thickness(0, 20, 0, 0)
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Fout bij laden van gegevens: {ex.Message}",
+                "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
-    private void LoadMockTransactions()
+    private void LoadTransactions(List<Transactie> transacties, List<Rekening> gebruikerRekeningen)
     {
         TransactionsPanel.Children.Clear();
 
-        var mockTransactions = new[]
-        {
-            new { Description = "Loon - Werkgever BV", Amount = 2850.00m, Date = "27 oktober 2024", Balance = 12847.50m, IsCredit = true },
-            new { Description = "Supermarkt Delhaize", Amount = -89.45m, Date = "26 oktober 2024", Balance = 9997.50m, IsCredit = false },
-            new { Description = "Huur - Appartement", Amount = -950.00m, Date = "25 oktober 2024", Balance = 10086.95m, IsCredit = false },
-            new { Description = "Terugbetaling - Belastingen", Amount = 345.60m, Date = "24 oktober 2024", Balance = 11036.95m, IsCredit = true },
-            new { Description = "Elektriciteit - Engie", Amount = -156.30m, Date = "23 oktober 2024", Balance = 10691.35m, IsCredit = false },
-            new { Description = "Restaurant La Trattoria", Amount = -67.50m, Date = "22 oktober 2024", Balance = 10847.65m, IsCredit = false },
-            new { Description = "Terugbetaling - Verzekering", Amount = 120.00m, Date = "21 oktober 2024", Balance = 10915.15m, IsCredit = true },
-            new { Description = "Tankstation Shell", Amount = -75.80m, Date = "20 oktober 2024", Balance = 10795.15m, IsCredit = false },
-        };
+        var gebruikerIbans = gebruikerRekeningen.Select(r => r.Iban).ToList();
 
-        for (int i = 0; i < mockTransactions.Length; i++)
+        for (int i = 0; i < transacties.Count; i++)
         {
-            var transaction = mockTransactions[i];
+            var t = transacties[i];
+
+            // Bepaal of dit een credit (ontvangen) of debit (betaald) is
+            bool isCredit = gebruikerIbans.Contains(t.NaarIban);
+
+            // Bereken weergave bedrag
+            decimal displayAmount = isCredit ? t.Bedrag : -t.Bedrag;
+
+            // Beschrijving
+            string description = string.IsNullOrWhiteSpace(t.Omschrijving)
+                ? (isCredit ? "Ontvangst" : "Betaling")
+                : t.Omschrijving;
+
             var button = CreateTransactionButton(
-                transaction.Description,
-                transaction.Amount,
-                transaction.Date,
-                transaction.Balance,
-                transaction.IsCredit,
+                description,
+                displayAmount,
+                t.Datum.ToString("dd MMMM yyyy"),
+                0, // Saldo wordt niet bewaard per transactie
+                isCredit,
                 i,
-                mockTransactions.Length
+                transacties.Count
             );
             TransactionsPanel.Children.Add(button);
 
-            // Add separator except for last item
-            if (i < mockTransactions.Length - 1)
+            // Separator tussen transacties
+            if (i < transacties.Count - 1)
             {
                 var separator = new Separator
                 {
@@ -74,7 +144,8 @@ public partial class SaldoRaadplegenPagina : Window
         }
     }
 
-    private Button CreateTransactionButton(string description, decimal amount, string date, decimal balance, bool isCredit, int index, int total)
+    private Button CreateTransactionButton(string description, decimal amount, string date,
+        decimal balance, bool isCredit, int index, int total)
     {
         var button = new Button
         {
@@ -134,26 +205,18 @@ public partial class SaldoRaadplegenPagina : Window
         Grid.SetColumn(leftStack, 0);
         grid.Children.Add(leftStack);
 
-        // Right side - Amount and Balance
+        // Right side - Amount
         var rightStack = new StackPanel { HorizontalAlignment = HorizontalAlignment.Right };
 
         var amountText = new TextBlock
         {
-            Text = $"{(isCredit ? "+" : "")}€ {amount:N2}",
+            Text = $"{(amount >= 0 ? "+" : "")}€ {amount:N2}",
             FontSize = 24,
             FontWeight = FontWeights.Bold,
             Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(isCredit ? "#4ADE80" : "#F87171")),
             Margin = new Thickness(0, 0, 0, 4)
         };
         rightStack.Children.Add(amountText);
-
-        var balanceText = new TextBlock
-        {
-            Text = $"Saldo: € {balance:N2}",
-            FontSize = 18,
-            Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280"))
-        };
-        rightStack.Children.Add(balanceText);
 
         Grid.SetColumn(rightStack, 1);
         grid.Children.Add(rightStack);
@@ -203,7 +266,6 @@ public partial class SaldoRaadplegenPagina : Window
         if (_voiceEnabled)
         {
             var message = $"{description}, € {Math.Abs(amount):N2}";
-            // TODO: Implementeer text-to-speech later
             System.Diagnostics.Debug.WriteLine($"Announce: {message}");
         }
     }
@@ -229,7 +291,6 @@ public partial class SaldoRaadplegenPagina : Window
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        // Global keyboard shortcut: Z to go back
         if (e.Key == Key.Z)
         {
 

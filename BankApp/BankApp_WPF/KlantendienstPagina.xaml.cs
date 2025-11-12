@@ -127,6 +127,7 @@ namespace BankApp_WPF
         {
             if (e.Key == Key.Escape)
                 BtnBack_Click(sender, e);
+
         
 
             if (e.Key == Key.Z)
@@ -141,6 +142,7 @@ namespace BankApp_WPF
                 this.Close();
 
             }
+
         }
 
         // Helper-methoden
