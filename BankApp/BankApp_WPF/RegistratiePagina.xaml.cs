@@ -204,3 +204,6 @@ namespace BankApp_WPF
                 return Convert.ToBase64String(hash);
             }
         }
+
+    }
+}
