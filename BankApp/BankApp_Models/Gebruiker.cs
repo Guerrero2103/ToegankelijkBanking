@@ -12,34 +12,34 @@ namespace BankApp_Models
         public int Id { get; set; }
 
         [Required, EmailAddress, MaxLength(255)]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required, MaxLength(255)]
-        public string WachtwoordHash { get; set; }
+        public string WachtwoordHash { get; set; } = string.Empty;
 
         [MaxLength(20)]
-        public string Telefoonnummer { get; set; }
+        public string Telefoonnummer { get; set; } = string.Empty;
 
         [Required]
         public DateTime Geboortedatum { get; set; }
 
         [MaxLength(100)]
-        public string Straatnaam { get; set; }
+        public string Straatnaam { get; set; } = string.Empty;
 
         [MaxLength(10)]
-        public string Huisnummer { get; set; }
+        public string Huisnummer { get; set; } = string.Empty;
 
         [MaxLength(10)]
         public string? Bus { get; set; }
 
         [MaxLength(10)]
-        public string Postcode { get; set; }
+        public string Postcode { get; set; } = string.Empty;
 
         [MaxLength(100)]
-        public string Gemeente { get; set; }
+        public string Gemeente { get; set; } = string.Empty;
 
         [MaxLength(100)]
-        public string Land { get; set; }
+        public string Land { get; set; } = string.Empty;
 
         // 🔗 Relatie met Rol
         public int? RolId { get; set; }

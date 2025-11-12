@@ -73,7 +73,7 @@ namespace BankApp_WPF
 
             if (gebruiker != null)
             {
-                SessionManager.Login(gebruiker);
+                // Gebruik UserSession in plaats van (niet-gevonden) SessionManager
                 UserSession.IngelogdeGebruiker = gebruiker;
 
                 MessageBox.Show($"Welkom {gebruiker.Email}!", "Login Succesvol",
@@ -134,23 +134,22 @@ namespace BankApp_WPF
 
         private Gebruiker? ValidateLogin(string email, string password)
         {
-            using (var context = new AppDbContext())
+            using var context = new AppDbContext();
+            var gebruiker = context.Gebruikers
+                .Include(g => g.Rol)
+                .FirstOrDefault(g => g.Email.ToLower() == email.ToLower());
+
+            if (gebruiker == null)
+                return null;
+
+            var ingevoerdeHash = HashWachtwoord(password);
+
+            if (gebruiker.WachtwoordHash == ingevoerdeHash)
             {
-                var gebruiker = context.Gebruikers
-                    .Include(g => g.Rol)
-                    .Include(g => g.Rekeningen)
-                    .FirstOrDefault(g => g.Email.ToLower() == email.ToLower());
-
-                if (gebruiker == null)
-                    return null;  // ✅ FIXED
-
-                var ingevoerdeHash = HashWachtwoord(password);
-
-                if (gebruiker.WachtwoordHash == ingevoerdeHash)
-                    return gebruiker;
-                else
-                    return null;
+                return gebruiker;
             }
+
+            return null;
         }
 
         private string HashWachtwoord(string wachtwoord)
