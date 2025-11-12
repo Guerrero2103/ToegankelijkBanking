@@ -23,7 +23,7 @@ namespace BankApp_WPF
                     // Database.EnsureCreated() wordt al aangeroepen in de constructor
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 MessageBox.Show($"Fout bij aanmaken database: {ex.Message}");
             }
@@ -39,7 +39,7 @@ namespace BankApp_WPF
 
         private async void LoadUserData()
         {
-            if (!SessionManager.IsLoggedIn)
+            if (!UserSession.IsIngelogd)
             {
                 MessageBox.Show("Je bent niet ingelogd.", "Fout",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -48,26 +48,29 @@ namespace BankApp_WPF
 
             try
             {
-                var gebruikerId = SessionManager.CurrentUser!.Id;
+                var gebruikerId = UserSession.IngelogdeGebruiker!.Id;
+
+                // Haal rekeningen op; maak er één aan als er geen zijn
+                var rekeningen = await _rekeningService.GetRekeningenByGebruikerIdAsync(gebruikerId);
+                if (rekeningen == null || rekeningen.Count == 0)
+                {
+                    var nieuwe = await _rekeningService.MaakRekeningAanAsync(gebruikerId, RekeningType.Zicht);
+                    rekeningen = new System.Collections.Generic.List<Rekening> { nieuwe };
+                }
 
                 // Haal totaal saldo op
                 var totaalSaldo = await _rekeningService.GetTotaalSaldoAsync(gebruikerId);
                 lblTotalSaldo.Content = $"€{totaalSaldo:N2}";
 
-                // Haal rekeningen op
-                var rekeningen = await _rekeningService.GetRekeningenByGebruikerIdAsync(gebruikerId);
-                var zichtRekening = rekeningen.FirstOrDefault(r => r.Type == RekeningType.Zicht);
-
+                // Toon zichtrekening IBAN volledig. Gebruik de eerste zichtrekening of de eerste beschikbare.
+                var zichtRekening = rekeningen.FirstOrDefault(r => r.Type == RekeningType.Zicht) ?? rekeningen.First();
                 if (zichtRekening != null)
                 {
-                    string maskedIban = zichtRekening.Iban.Length > 4
-                        ? "•••• " + zichtRekening.Iban.Substring(zichtRekening.Iban.Length - 4)
-                        : zichtRekening.Iban;
-                    lblAccountNumber.Content = $"Zichtrekening {maskedIban}";
 
+                    lblAccountNumber.Content = $"Zichtrekening {zichtRekening.Iban}";
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
 
                 MessageBox.Show($"Fout bij laden gegevens: {ex.Message}", "Fout",
@@ -122,7 +125,7 @@ namespace BankApp_WPF
 
             if (result == MessageBoxResult.Yes)
             {
-                SessionManager.Logout();
+                UserSession.LogUit();
                 StartPagina startPagina = new StartPagina();
                 startPagina.Show();
                 this.Close();

@@ -24,6 +24,7 @@ public partial class SaldoRaadplegenPagina : Window
         // Initialize services
         var context = new AppDbContext();
         _rekeningService = new RekeningService(context);
+        _transactieService = new TransactieService(context); // small compatibility: field name must be _transactieService
         _transactieService = new TransactieService(context);
 
         // Load real data
@@ -32,7 +33,7 @@ public partial class SaldoRaadplegenPagina : Window
 
     private async void LoadRealData()
     {
-        if (!SessionManager.IsLoggedIn)
+        if (!UserSession.IsIngelogd)
         {
             MessageBox.Show("Je moet ingelogd zijn om je saldo te bekijken.",
                 "Niet ingelogd", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -42,40 +43,30 @@ public partial class SaldoRaadplegenPagina : Window
 
         try
         {
-            var gebruikerId = SessionManager.CurrentUser!.Id;
+            var gebruikerId = UserSession.IngelogdeGebruiker!.Id;
 
-            // Haal rekeningen en totaal saldo op
+            // Haal rekeningen op; maak zichtrekening aan als er geen bestaan
             var rekeningen = await _rekeningService.GetRekeningenByGebruikerIdAsync(gebruikerId);
+            if (rekeningen == null || rekeningen.Count == 0)
+            {
+                var nieuwe = await _rekeningService.MaakRekeningAanAsync(gebruikerId, RekeningType.Zicht);
+                rekeningen = new List<Rekening> { nieuwe };
+            }
+
             var totaalSaldo = await _rekeningService.GetTotaalSaldoAsync(gebruikerId);
 
             // Update saldo display
             lblCurrentBalance.Content = $"€ {totaalSaldo:N2}";
 
-            // Toon eerste zichtrekening info
+            // Toon eerste zichtrekening info (volledige IBAN)
             if (rekeningen.Any())
             {
-                var hoofdRekening = rekeningen.FirstOrDefault(r => r.Type == RekeningType.Zicht);
-                if (hoofdRekening != null)
-                {
-                    string maskedIban = hoofdRekening.Iban.Length > 4
-                        ? "•••• " + hoofdRekening.Iban.Substring(hoofdRekening.Iban.Length - 4)
-                        : hoofdRekening.Iban;
-                    lblAccountInfo.Content = $"Zichtrekening {maskedIban}";
-                }
+                var hoofdRekening = rekeningen.FirstOrDefault(r => r.Type == RekeningType.Zicht) ?? rekeningen.First();
+                lblAccountInfo.Content = $"Zichtrekening {hoofdRekening.Iban}";
             }
 
-            // TODO: Bereken saldoverandering (vereist historische data)
-            // Voor nu: dummy waardes
-            txtBalanceChangeIcon.Text = totaalSaldo > 1000 ? "📈" : "📉";
-            lblBalanceChange.Content = totaalSaldo > 1000
-                ? "+ € 197,50 (+2.3%)"
-                : "- € 50,00 (-0.5%)";
-            lblBalanceChange.Foreground = new SolidColorBrush(
-                (Color)ColorConverter.ConvertFromString(totaalSaldo > 1000 ? "#4ADE80" : "#F87171"));
-
-            // Haal transacties op
+            // Rest van de methode: transacties ophalen en tonen
             var transacties = await _transactieService.GetTransactiesByGebruikerIdAsync(gebruikerId, 10);
-
             if (transacties.Any())
             {
                 LoadTransactions(transacties, rekeningen);
@@ -108,13 +99,8 @@ public partial class SaldoRaadplegenPagina : Window
         {
             var t = transacties[i];
 
-            // Bepaal of dit een credit (ontvangen) of debit (betaald) is
             bool isCredit = gebruikerIbans.Contains(t.NaarIban);
-
-            // Bereken weergave bedrag
             decimal displayAmount = isCredit ? t.Bedrag : -t.Bedrag;
-
-            // Beschrijving
             string description = string.IsNullOrWhiteSpace(t.Omschrijving)
                 ? (isCredit ? "Ontvangst" : "Betaling")
                 : t.Omschrijving;
@@ -123,14 +109,13 @@ public partial class SaldoRaadplegenPagina : Window
                 description,
                 displayAmount,
                 t.Datum.ToString("dd MMMM yyyy"),
-                0, // Saldo wordt niet bewaard per transactie
+                0,
                 isCredit,
                 i,
                 transacties.Count
             );
             TransactionsPanel.Children.Add(button);
 
-            // Separator tussen transacties
             if (i < transacties.Count - 1)
             {
                 var separator = new Separator
@@ -153,23 +138,18 @@ public partial class SaldoRaadplegenPagina : Window
             TabIndex = index
         };
 
-        // Set automation properties
         var transactionType = isCredit ? "ontvangen" : "betaald";
         AutomationProperties.SetName(button,
             $"Transactie {index + 1} van {total}: {description}, " +
             $"{transactionType} € {Math.Abs(amount):N2}, {date}");
 
-        // Create content grid
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-        // Left side - Description and Date
         var leftStack = new StackPanel();
-
         var descriptionPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
 
-        // Icon
         var icon = new TextBlock
         {
             Text = isCredit ? "↙" : "↗",
@@ -180,7 +160,6 @@ public partial class SaldoRaadplegenPagina : Window
         };
         descriptionPanel.Children.Add(icon);
 
-        // Description
         var descriptionText = new TextBlock
         {
             Text = description,
@@ -192,7 +171,6 @@ public partial class SaldoRaadplegenPagina : Window
 
         leftStack.Children.Add(descriptionPanel);
 
-        // Date
         var dateText = new TextBlock
         {
             Text = date,
@@ -205,9 +183,7 @@ public partial class SaldoRaadplegenPagina : Window
         Grid.SetColumn(leftStack, 0);
         grid.Children.Add(leftStack);
 
-        // Right side - Amount
         var rightStack = new StackPanel { HorizontalAlignment = HorizontalAlignment.Right };
-
         var amountText = new TextBlock
         {
             Text = $"{(amount >= 0 ? "+" : "")}€ {amount:N2}",
@@ -222,8 +198,6 @@ public partial class SaldoRaadplegenPagina : Window
         grid.Children.Add(rightStack);
 
         button.Content = grid;
-
-        // Event handlers
         button.Click += (s, e) => AnnounceTransaction(description, amount);
         button.KeyDown += (s, e) => HandleTransactionKeyDown(e, index, total);
 
@@ -233,7 +207,6 @@ public partial class SaldoRaadplegenPagina : Window
     private void HandleTransactionKeyDown(KeyEventArgs e, int currentIndex, int totalCount)
     {
         int newIndex = currentIndex;
-
         switch (e.Key)
         {
             case Key.Down:
@@ -252,7 +225,6 @@ public partial class SaldoRaadplegenPagina : Window
                 return;
         }
 
-        // Focus new transaction (skip separators: index * 2)
         var targetIndex = newIndex * 2;
         if (targetIndex < TransactionsPanel.Children.Count &&
             TransactionsPanel.Children[targetIndex] is Button targetButton)
@@ -283,7 +255,7 @@ public partial class SaldoRaadplegenPagina : Window
 
     private void BtnBack_Click(object sender, RoutedEventArgs e)
     {
-        // Open specifiek venster bij indrukken van Z
+
         HoofdPagina hoofdPagina = new HoofdPagina();
         hoofdPagina.Show();
         this.Close();

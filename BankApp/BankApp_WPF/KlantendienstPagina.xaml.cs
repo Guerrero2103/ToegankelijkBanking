@@ -117,8 +117,8 @@ namespace BankApp_WPF
         // 🔙 Terug naar startpagina
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
-            StartPagina startPagina = new StartPagina();
-            startPagina.Show();
+            HoofdPagina hoofdPagina = new HoofdPagina();
+            hoofdPagina.Show();
             this.Close();
         }
 

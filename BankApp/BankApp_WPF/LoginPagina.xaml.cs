@@ -73,7 +73,8 @@ namespace BankApp_WPF
 
             if (gebruiker != null)
             {
-                SessionManager.Login(gebruiker);
+                // Gebruik UserSession in plaats van (niet-gevonden) SessionManager
+                UserSession.IngelogdeGebruiker = gebruiker;
 
                 MessageBox.Show($"Welkom {gebruiker.Email}!", "Login Succesvol",
                     MessageBoxButton.OK, MessageBoxImage.Information);
@@ -133,41 +134,22 @@ namespace BankApp_WPF
 
         private Gebruiker? ValidateLogin(string email, string password)
         {
-            using (var context = new AppDbContext())
+            using var context = new AppDbContext();
+            var gebruiker = context.Gebruikers
+                .Include(g => g.Rol)
+                .FirstOrDefault(g => g.Email.ToLower() == email.ToLower());
+
+            if (gebruiker == null)
+                return null;
+
+            var ingevoerdeHash = HashWachtwoord(password);
+
+            if (gebruiker.WachtwoordHash == ingevoerdeHash)
             {
-                // Zoek gebruiker met dit e-mailadres
-                var gebruiker = context.Gebruikers
-                    .Include(g => g.Rol) // optioneel: rol mee laden
-                    .FirstOrDefault(g => g.Email.ToLower() == email.ToLower());
-
-                if (gebruiker == null)
-                    return false;
-
-                // 🔐 Hash het ingevoerde wachtwoord
-                var ingevoerdeHash = HashWachtwoord(password);
-
-
-                // 🧩 Debug info in popup (alleen tijdelijk!)
-                /*string debugInfo =
-                    $"=== LOGIN DEBUG ===\n" +
-                    $"Email: {email}\n\n" +
-                    $"Wachtwoord: {password}\n\n" +
-                    $"Ingevoerde hash:\n{ingevoerdeHash}\n\n" +
-                    $"Database hash:\n{gebruiker.WachtwoordHash}\n\n" +
-                    $"Hash match? {(ingevoerdeHash == gebruiker.WachtwoordHash)}";
-
-                MessageBox.Show(debugInfo, "Login Debug Info", MessageBoxButton.OK, MessageBoxImage.Information);*/
-
-                if (gebruiker.WachtwoordHash == ingevoerdeHash)
-                {
-                    //Zet de ingelogde gebruiker in de sessie
-                    UserSession.IngelogdeGebruiker = gebruiker;
-                    return true;
-                }
-
-                return false;
 
             }
+
+            return null;
         }
 
         private string HashWachtwoord(string wachtwoord)
