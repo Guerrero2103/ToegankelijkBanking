@@ -74,6 +74,7 @@ namespace BankApp_WPF
             if (gebruiker != null)
             {
                 SessionManager.Login(gebruiker);
+                UserSession.IngelogdeGebruiker = gebruiker;
 
                 MessageBox.Show($"Welkom {gebruiker.Email}!", "Login Succesvol",
                     MessageBoxButton.OK, MessageBoxImage.Information);
@@ -136,34 +137,19 @@ namespace BankApp_WPF
             using (var context = new AppDbContext())
             {
                 var gebruiker = context.Gebruikers
-                    .Include(g => g.Rol) // optioneel: rol mee laden
+                    .Include(g => g.Rol)
+                    .Include(g => g.Rekeningen)
                     .FirstOrDefault(g => g.Email.ToLower() == email.ToLower());
 
                 if (gebruiker == null)
-                    return false;
-                }
+                    return null;  // ✅ FIXED
 
                 var ingevoerdeHash = HashWachtwoord(password);
 
-                // 🧩 Debug info in popup (alleen tijdelijk!)
-                /*string debugInfo =
-                    $"=== LOGIN DEBUG ===\n" +
-                    $"Email: {email}\n\n" +
-                    $"Wachtwoord: {password}\n\n" +
-                    $"Ingevoerde hash:\n{ingevoerdeHash}\n\n" +
-                    $"Database hash:\n{gebruiker.WachtwoordHash}\n\n" +
-                    $"Hash match? {(ingevoerdeHash == gebruiker.WachtwoordHash)}";
-
-                MessageBox.Show(debugInfo, "Login Debug Info", MessageBoxButton.OK, MessageBoxImage.Information);*/
-
                 if (gebruiker.WachtwoordHash == ingevoerdeHash)
-                {
-                    //Zet de ingelogde gebruiker in de sessie
-                    UserSession.IngelogdeGebruiker = gebruiker;
-                    return true;
-                }
-
-                return false;
+                    return gebruiker;
+                else
+                    return null;
             }
         }
 
