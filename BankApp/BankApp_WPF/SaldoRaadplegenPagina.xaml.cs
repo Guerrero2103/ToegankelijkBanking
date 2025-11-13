@@ -29,6 +29,10 @@ public partial class SaldoRaadplegenPagina : Window
 
         // Load real data
         LoadRealData();
+
+        this.KeyDown += Window_KeyDown;
+        this.Focusable = true;
+        this.Focus();
     }
 
     private async void LoadRealData()
@@ -265,6 +269,8 @@ public partial class SaldoRaadplegenPagina : Window
         if (e.Key == Key.Z)
         {
             e.Handled = true;
+            HoofdPagina hoofdPagina = new HoofdPagina();
+            hoofdPagina.Show();
             this.Close();
         }
     }

@@ -16,6 +16,20 @@ namespace BankApp_WPF
         {
             InitializeComponent();
             this.Loaded += (s, e) => TxtEmail.Focus();
+            this.KeyDown += Window_KeyDown;
+            this.Focusable = true;
+            this.Focus();
+        }
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Z)
+            {
+                e.Handled = true;
+                StartPagina startPagina = new StartPagina();
+                startPagina.Show();
+                this.Close();
+
+            }
         }
 
         private void BtnBack_Click(object sender, RoutedEventArgs e)
@@ -105,13 +119,6 @@ namespace BankApp_WPF
             }
         }
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape)
-            {
-                BtnBack_Click(sender, e);
-            }
-        }
 
         private void ShowError(string message)
         {

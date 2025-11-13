@@ -17,13 +17,14 @@ public partial class SparenInvesteren : Window
         this.Focus();
     }
 
-    // Keyboard shortcuts handler
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Z)
         {
             e.Handled = true;
-            GaTerugNaarHoofdPagina();
+            HoofdPagina hoofdPagina = new HoofdPagina();
+            hoofdPagina.Show();
+            this.Close();
         }
     }
 

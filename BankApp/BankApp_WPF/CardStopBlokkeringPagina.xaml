@@ -6,7 +6,8 @@
         Width="1600"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Background="#000000">
+        Background="#000000"
+        KeyDown="Window_KeyDown">
     <Grid>
         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18">Kaart blokkering (tijdelijke inhoud)</TextBlock>
     </Grid>

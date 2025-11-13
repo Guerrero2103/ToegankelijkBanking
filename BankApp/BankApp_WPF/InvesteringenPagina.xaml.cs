@@ -21,6 +21,20 @@ namespace BankApp_WPF
         public InvesteringenPagina()
         {
             InitializeComponent();
+            this.KeyDown += Window_KeyDown;
+            this.Focusable = true;
+            this.Focus();
+        }
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Z)
+            {
+                e.Handled = true;
+                SparenInvesteren sparenInvesteren = new SparenInvesteren();
+                sparenInvesteren.Show();
+                this.Close();
+
+            }
         }
 
         // Terug knop - sluit het huidige venster

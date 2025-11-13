@@ -32,7 +32,22 @@ namespace BankApp_WPF
             InitializeComponent();
             Spaarrekeningen = new ObservableCollection<Rekening>();
             LaadSpaarrekeningen(); // Laad spaarrekeningen uit database
+            this.KeyDown += Window_KeyDown;
+            this.Focusable = true;
+            this.Focus();
         }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Z)
+            {
+                e.Handled = true;
+                SparenInvesteren sparenInvesteren = new SparenInvesteren();
+                sparenInvesteren.Show();
+                this.Close();
+            }
+        }
+    
 
         // Laad alle spaarrekeningen van de ingelogde gebruiker uit database
         private void LaadSpaarrekeningen()

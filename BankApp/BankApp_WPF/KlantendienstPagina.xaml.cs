@@ -14,6 +14,20 @@ namespace BankApp_WPF
         {
             InitializeComponent();
             this.Loaded += (s, e) => TxtNaam.Focus();
+            this.KeyDown += Window_KeyDown;
+            this.Focusable = true;
+            this.Focus();
+        }
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Z)
+            {
+                e.Handled = true;
+                HoofdPagina hoofdPagina = new HoofdPagina();
+                hoofdPagina.Show();
+                this.Close();
+
+            }
         }
 
         // 🌓 Thema wisselen
@@ -122,12 +136,6 @@ namespace BankApp_WPF
             this.Close();
         }
 
-        // ❌ Escape sluit de pagina
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape)
-                BtnBack_Click(sender, e);
-        }
 
         // Helper-methoden
         private void ShowError(string message)

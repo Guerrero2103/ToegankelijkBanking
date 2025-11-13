@@ -195,6 +195,7 @@ namespace BankApp_WPF
             {
                 OverschrijvingenPagina overschrijvingenPagina = new OverschrijvingenPagina();
                 overschrijvingenPagina.Show();
+                this.Close();
             }
             catch (Exception ex)
             {

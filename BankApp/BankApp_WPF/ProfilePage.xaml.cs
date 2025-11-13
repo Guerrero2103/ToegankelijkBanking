@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 
 namespace BankApp_WPF
 {
@@ -14,6 +15,20 @@ namespace BankApp_WPF
         {
             InitializeComponent();
             Loaded += ProfilePage_Loaded;
+            this.KeyDown += Window_KeyDown;
+            this.Focusable = true;
+            this.Focus();
+        }
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Z)
+            {
+                e.Handled = true;
+                HoofdPagina hoofdPagina = new HoofdPagina();
+                hoofdPagina.Show();
+                this.Close();
+
+            }
         }
 
         private void ProfilePage_Loaded(object sender, RoutedEventArgs e)

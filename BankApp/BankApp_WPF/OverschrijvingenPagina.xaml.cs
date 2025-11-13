@@ -1,8 +1,9 @@
-﻿using System;
+﻿using BankApp_BusinessLogic;
+using BankApp_Models;
+using System;
 using System.Linq;
 using System.Windows;
-using BankApp_Models;
-using BankApp_BusinessLogic;
+using System.Windows.Input;
 
 namespace BankApp_WPF
 {
@@ -19,10 +20,27 @@ namespace BankApp_WPF
                 this.Close();
                 return;
             }
+            this.KeyDown += Window_KeyDown;
+            this.Focusable = true;
+            this.Focus();
         }
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Z)
+            {
+                e.Handled = true;
+                HoofdPagina hoofdPagina = new HoofdPagina();
+                hoofdPagina.Show();
+                this.Close();
+
+            }
+        }
+        
 
         private void BtnTerug_Click(object sender, RoutedEventArgs e)
         {
+            HoofdPagina hoofdPagina = new HoofdPagina();
+            hoofdPagina.Show();
             this.Close();
         }
 
