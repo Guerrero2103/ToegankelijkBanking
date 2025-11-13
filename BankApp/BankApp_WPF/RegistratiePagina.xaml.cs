@@ -14,6 +14,20 @@ namespace BankApp_WPF
         {
             InitializeComponent();
             LandBox.Text = "België";
+            this.KeyDown += Window_KeyDown;
+            this.Focusable = true;
+            this.Focus();
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Z)
+            {
+                e.Handled = true;
+                StartPagina startPagina = new StartPagina();
+                startPagina.Show();
+                this.Close();
+            }
         }
 
         private void RegistreerBtn_Click(object sender, RoutedEventArgs e)

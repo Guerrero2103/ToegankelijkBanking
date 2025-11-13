@@ -19,7 +19,7 @@ public partial class SparenInvesteren : Window
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Z)
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Z)
         {
             e.Handled = true;
             HoofdPagina hoofdPagina = new HoofdPagina();

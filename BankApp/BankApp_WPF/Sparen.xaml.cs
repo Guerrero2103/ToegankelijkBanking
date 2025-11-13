@@ -39,7 +39,7 @@ namespace BankApp_WPF
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Z)
+            if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Z)
             {
                 e.Handled = true;
                 SparenInvesteren sparenInvesteren = new SparenInvesteren();
