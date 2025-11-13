@@ -158,14 +158,25 @@ namespace BankApp_WPF
                             gebruiker.Gemeente = CityTextBox.Text.Trim();
                             gebruiker.Land = CountryTextBox.Text.Trim();
 
-                            // Update rol
-                            if (RoleComboBox.SelectedIndex == 1)
+                            // Update rol op basis van ComboBox index
+                            // Index 0 = Klant (Id 1)
+                            // Index 1 = Medewerker (Id 2)
+                            // Index 2 = Beheerder (Id 3)
+                            if (RoleComboBox.SelectedIndex == 0)
+                            {
+                                gebruiker.RolId = 1; // Klant
+                            }
+                            else if (RoleComboBox.SelectedIndex == 1)
+                            {
+                                gebruiker.RolId = 2; // Medewerker
+                            }
+                            else if (RoleComboBox.SelectedIndex == 2)
                             {
                                 gebruiker.RolId = 3; // Beheerder
                             }
                             else
                             {
-                                gebruiker.RolId = 1; // Klant
+                                gebruiker.RolId = 1; // Standaard Klant
                             }
 
                             // Update wachtwoord alleen als er een nieuw wachtwoord is ingevoerd
@@ -194,9 +205,20 @@ namespace BankApp_WPF
                     else
                     {
                         // NIEUWE KLANT TOEVOEGEN
-                        // Bepaal rol (standaard Klant = 1)
-                        int rolId = 1; // Klant
-                        if (RoleComboBox.SelectedIndex == 1)
+                        // Bepaal rol op basis van ComboBox index
+                        // Index 0 = Klant (Id 1)
+                        // Index 1 = Medewerker (Id 2)
+                        // Index 2 = Beheerder (Id 3)
+                        int rolId = 1; // Standaard Klant
+                        if (RoleComboBox.SelectedIndex == 0)
+                        {
+                            rolId = 1; // Klant
+                        }
+                        else if (RoleComboBox.SelectedIndex == 1)
+                        {
+                            rolId = 2; // Medewerker
+                        }
+                        else if (RoleComboBox.SelectedIndex == 2)
                         {
                             rolId = 3; // Beheerder
                         }
@@ -225,9 +247,33 @@ namespace BankApp_WPF
                         context.Gebruikers.Add(nieuweGebruiker);
                         context.SaveChanges();
 
+                        // Automatisch een zichtrekening aanmaken
+                        var nieuweRekening = new Rekening
+                        {
+                            Iban = "BE" + DateTime.Now.Ticks.ToString().Substring(0, 10),
+                            Type = RekeningType.Zicht,
+                            Saldo = 0.0m,
+                            GebruikerId = nieuweGebruiker.Id
+                        };
+                        context.Rekeningen.Add(nieuweRekening);
+                        context.SaveChanges();
+
+                        // Automatisch een kaart aanmaken voor de nieuwe gebruiker
+                        string kaartNummer = GenereerUniekKaartNummer(context);
+                        var nieuweKaart = new Kaart
+                        {
+                            KaartNummer = kaartNummer,
+                            Status = KaartStatus.Actief,
+                            GebruikerId = nieuweGebruiker.Id
+                        };
+                        context.Kaarten.Add(nieuweKaart);
+                        context.SaveChanges();
+
                         MessageBox.Show($"Nieuwe klant toegevoegd!\n\n" +
                             $"Email: {EmailTextBox.Text}\n" +
-                            $"ID: {nieuweGebruiker.Id}",
+                            $"ID: {nieuweGebruiker.Id}\n" +
+                            $"IBAN: {nieuweRekening.Iban}\n" +
+                            $"Kaartnummer: {nieuweKaart.KaartNummer}",
                             "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
 
                         // Form leegmaken na toevoegen
@@ -253,6 +299,47 @@ namespace BankApp_WPF
                 byte[] hash = sha256.ComputeHash(bytes);
                 return Convert.ToBase64String(hash);
             }
+        }
+
+        // Genereer uniek kaartnummer (formaat: XXXX-XXXX-XXXX-XXXX)
+        private string GenereerKaartNummer()
+        {
+            // Gebruik DateTime.Ticks als seed voor betere randomisatie
+            Random random = new Random((int)(DateTime.Now.Ticks % int.MaxValue));
+            string kaartNummer = "";
+
+            // Genereer 4 groepen van 4 cijfers
+            for (int i = 0; i < 4; i++)
+            {
+                if (i > 0) kaartNummer += "-";
+                kaartNummer += random.Next(1000, 10000).ToString();
+            }
+
+            return kaartNummer;
+        }
+
+        // Genereer uniek kaartnummer en controleer of het al bestaat
+        private string GenereerUniekKaartNummer(AppDbContext db)
+        {
+            string kaartNummer;
+            int maxPogingen = 100; // Maximaal 100 pogingen om uniek nummer te vinden
+            int poging = 0;
+
+            do
+            {
+                kaartNummer = GenereerKaartNummer();
+                poging++;
+
+                // Controleer of kaartnummer al bestaat
+                bool bestaatAl = db.Kaarten.Any(k => k.KaartNummer == kaartNummer);
+                if (!bestaatAl)
+                {
+                    return kaartNummer;
+                }
+            } while (poging < maxPogingen);
+
+            // Als na 100 pogingen nog geen uniek nummer gevonden, voeg timestamp toe
+            return GenereerKaartNummer() + "-" + DateTime.Now.Ticks.ToString().Substring(Math.Max(0, DateTime.Now.Ticks.ToString().Length - 4));
         }
 
 
@@ -289,14 +376,25 @@ namespace BankApp_WPF
                         CityTextBox.Text = gebruiker.Gemeente ?? "";
                         CountryTextBox.Text = gebruiker.Land ?? "";
 
-                        // Zet rol combobox
-                        if (gebruiker.RolId == 3)
+                        // Zet rol combobox op basis van RolId
+                        // RolId 1 = Klant (Index 0)
+                        // RolId 2 = Medewerker (Index 1)
+                        // RolId 3 = Beheerder (Index 2)
+                        if (gebruiker.RolId == 1)
                         {
-                            RoleComboBox.SelectedIndex = 1; // Admin
+                            RoleComboBox.SelectedIndex = 0; // Klant
+                        }
+                        else if (gebruiker.RolId == 2)
+                        {
+                            RoleComboBox.SelectedIndex = 1; // Medewerker
+                        }
+                        else if (gebruiker.RolId == 3)
+                        {
+                            RoleComboBox.SelectedIndex = 2; // Beheerder
                         }
                         else
                         {
-                            RoleComboBox.SelectedIndex = 0; // Klant
+                            RoleComboBox.SelectedIndex = 0; // Standaard Klant
                         }
 
                         // Verander knop tekst naar "Bijwerken"

@@ -15,25 +15,14 @@ namespace BankApp_WPF
         public LoginPagina()
         {
             InitializeComponent();
-            this.Loaded += (s, e) => TxtEmail.Focus();
-            this.KeyDown += Window_KeyDown;
-            this.Focusable = true;
-            this.Focus();
-        }
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Z)
-            {
-                e.Handled = true;
-                StartPagina startPagina = new StartPagina();
-                startPagina.Show();
-                this.Close();
 
-            }
+
+            this.Loaded += (s, e) => TxtEmail.Focus();
         }
 
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
+
             StartPagina startPagina = new StartPagina();
             startPagina.Show();
             this.Close();
@@ -41,22 +30,26 @@ namespace BankApp_WPF
 
         private void BtnTheme_Click(object sender, RoutedEventArgs e)
         {
+
             isDarkMode = !isDarkMode;
 
             if (isDarkMode)
             {
                 this.Background = Brushes.Black;
                 BtnTheme.Content = new TextBlock { Text = "☀", Foreground = Brushes.White, FontSize = 24 };
+                BtnTheme.ToolTip = "Schakel naar licht thema";
             }
             else
             {
                 this.Background = Brushes.White;
                 BtnTheme.Content = new TextBlock { Text = "🌙", Foreground = Brushes.White, FontSize = 24 };
+                BtnTheme.ToolTip = "Schakel naar donker thema";
             }
         }
 
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
+
             string email = TxtEmail.Text.Trim();
             string password = TxtPassword.Password;
 
@@ -76,30 +69,40 @@ namespace BankApp_WPF
                 return;
             }
 
+
             if (!IsValidEmail(email))
             {
-                ShowError("Ongeldig email formaat.");
+                ShowError("Ongeldig email formaat. Gebruik: gebruiker@voorbeeld.be");
                 TxtEmail.Focus();
                 return;
             }
 
-            var gebruiker = ValidateLogin(email, password);
 
+            var gebruiker = ValidateLogin(email, password);
             if (gebruiker != null)
             {
-                // Gebruik UserSession in plaats van (niet-gevonden) SessionManager
-                UserSession.IngelogdeGebruiker = gebruiker;
+                MessageBox.Show("Login succesvol!", "Welkom", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                MessageBox.Show($"Welkom {gebruiker.Email}!", "Login Succesvol",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                // Controleer rol en open juiste pagina
+                // RolId 3 = Beheerder (Admin)
+                if (gebruiker.RolId == 3)
+                {
+                    // Beheerder gaat naar AdminPagina
+                    AdminPagina adminPagina = new AdminPagina();
+                    adminPagina.Show();
+                }
+                else
+                {
+                    // Klant of Medewerker gaat naar HoofdPagina
+                    HoofdPagina hoofd = new HoofdPagina();
+                    hoofd.Show();
+                }
 
-                HoofdPagina hoofd = new HoofdPagina();
-                hoofd.Show();
                 this.Close();
             }
             else
             {
-                ShowError("Onjuiste email of wachtwoord.");
+                ShowError("Onjuiste email of wachtwoord. Probeer opnieuw.");
                 TxtPassword.Clear();
                 TxtEmail.Focus();
             }
@@ -107,15 +110,32 @@ namespace BankApp_WPF
 
         private void LinkForgotPassword_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Wachtwoord Reset: Stuur email naar support@accessbank.be",
-                "Wachtwoord Vergeten", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(
+                "Wachtwoord Reset Aanvraag\n\n" +
+                "Stuur een email naar support@accessbank.be met:\n" +
+                "- Je geregistreerd email adres\n" +
+                "- Je klantnummer\n\n" +
+                "Je ontvangt binnen 24 uur een reset link.",
+                "Wachtwoord Vergeten",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
 
         private void TxtPassword_KeyDown(object sender, KeyEventArgs e)
         {
+
             if (e.Key == Key.Enter)
             {
                 BtnLogin_Click(sender, e);
+            }
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+
+            if (e.Key == Key.Escape)
+            {
+                BtnBack_Click(sender, e);
             }
         }
 
@@ -139,24 +159,30 @@ namespace BankApp_WPF
             }
         }
 
-        private Gebruiker? ValidateLogin(string email, string password)
+        // Retourneert Gebruiker object als login succesvol is, anders null
+        private Gebruiker ValidateLogin(string email, string password)
         {
-            using var context = new AppDbContext();
-            var gebruiker = context.Gebruikers
-                .Include(g => g.Rol)
-                .FirstOrDefault(g => g.Email.ToLower() == email.ToLower());
-
-            if (gebruiker == null)
-                return null;
-
-            var ingevoerdeHash = HashWachtwoord(password);
-
-            if (gebruiker.WachtwoordHash == ingevoerdeHash)
+            using (var context = new AppDbContext())
             {
-                return gebruiker;
-            }
+                // Zoek gebruiker met dit e-mailadres
+                var gebruiker = context.Gebruikers
+                    .Include(g => g.Rol) // Laad rol mee voor rolcontrole
+                    .FirstOrDefault(g => g.Email.ToLower() == email.ToLower());
 
-            return null;
+                if (gebruiker == null)
+                    return null;
+
+                // Hash het ingevoerde wachtwoord
+                var ingevoerdeHash = HashWachtwoord(password);
+
+                // Vergelijk hashes - retourneer gebruiker als wachtwoord correct is
+                if (gebruiker.WachtwoordHash == ingevoerdeHash)
+                {
+                    return gebruiker;
+                }
+
+                return null;
+            }
         }
 
         private string HashWachtwoord(string wachtwoord)
@@ -168,5 +194,6 @@ namespace BankApp_WPF
                 return Convert.ToBase64String(hash);
             }
         }
+
     }
 }

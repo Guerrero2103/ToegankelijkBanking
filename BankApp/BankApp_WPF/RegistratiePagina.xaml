@@ -6,8 +6,7 @@
         Width="1600"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Background="#000000"
-        KeyDown="Window_KeyDown">
+        Background="#000000">
 
     <Window.Resources>
         <!-- Zelfde Button Style als HoofdPagina -->
@@ -151,7 +150,7 @@
                             </StackPanel>
                         </Grid>
 
-                        <TextBlock Text="Uw IBAN wordt automatisch toegewezen na succesvolle registratie" 
+                        <TextBlock Text="Uw IBAN en kaartnummer worden automatisch toegewezen na succesvolle registratie" 
                                    Foreground="#8EA9FF" FontSize="14" TextWrapping="Wrap" 
                                    Margin="0,25,0,20" HorizontalAlignment="Center" Width="600"/>
 

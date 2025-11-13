@@ -7,7 +7,7 @@
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Background="#000000"
-        KeyDown="Window_KeyDown">
+        >
 
     <Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="400">

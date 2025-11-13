@@ -308,19 +308,24 @@
                                         <TextBlock Text="Rol *" Foreground="White" FontSize="12" Margin="0,0,0,5"/>
                                         <ComboBox x:Name="RoleComboBox"
                                                   Background="#1f2533"
-                                                  Foreground="White"
                                                   BorderBrush="#3a4152"
                                                   BorderThickness="1"
                                                   Padding="10,8"
                                                   Height="35">
                                             <ComboBox.Resources>
                                                 <Style TargetType="ComboBoxItem">
-                                                    <Setter Property="Foreground" Value="Black"/>
-                                                    <Setter Property="Background" Value="White"/>
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                    <Setter Property="Background" Value="#1f2533"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsHighlighted" Value="True">
+                                                            <Setter Property="Background" Value="#3a4152"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
                                                 </Style>
                                             </ComboBox.Resources>
-                                            <ComboBoxItem Content="Klant" Foreground="Black"/>
-                                            <ComboBoxItem Content="Admin" Foreground="Black"/>
+                                            <ComboBoxItem Content="Klant" Foreground="White"/>
+                                            <ComboBoxItem Content="Medewerker" Foreground="White"/>
+                                            <ComboBoxItem Content="Beheerder" Foreground="White"/>
                                         </ComboBox>
                                     </StackPanel>
 
@@ -502,14 +507,19 @@
                                                         <TextBlock Foreground="White" FontWeight="Bold" FontSize="13">
 															<Run Text="Kaart ID: "/>
 															<Run Text="{Binding Id}"/>
+															<Run Text=" | "/>
+															<Run Text="{Binding Gebruiker.Email}"/>
                                                         </TextBlock>
                                                         <TextBlock Foreground="#999999" FontSize="11" Margin="0,3,0,0">
 															<Run Text="Kaartnummer: "/>
 															<Run Text="{Binding KaartNummer}"/>
                                                         </TextBlock>
                                                         <TextBlock Foreground="#999999" FontSize="11" Margin="0,3,0,0">
-															<Run Text="Gebruiker ID: "/>
+															<Run Text="Gebruiker: "/>
+															<Run Text="{Binding Gebruiker.Email}"/>
+															<Run Text=" (ID: "/>
 															<Run Text="{Binding GebruikerId}"/>
+															<Run Text=")"/>
                                                         </TextBlock>
                                                         <TextBlock FontSize="11" Margin="0,3,0,0">
 															<Run Text="Status: "/>
@@ -525,7 +535,7 @@
                                                                 Cursor="Hand"
                                                                 Click="BtnActiefMaken_Click"
                                                                 Tag="{Binding Id}">
-                                                            Actief maken
+                                                            ✅ Actief maken
                                                         </Button>
 
                                                         <Button Background="#fbbf24"
@@ -535,7 +545,7 @@
                                                                 Cursor="Hand"
                                                                 Click="BtnBevriezen_Click"
                                                                 Tag="{Binding Id}">
-                                                             Bevriezen
+                                                            ❄️ Bevriezen
                                                         </Button>
 
                                                         <Button Background="#ef4444"
@@ -545,7 +555,7 @@
                                                                 Cursor="Hand"
                                                                 Click="BtnBlokkeren_Click"
                                                                 Tag="{Binding Id}">
-                                                             Blokkeren
+                                                            🔒 Blokkeren
                                                         </Button>
                                                     </StackPanel>
                                                 </Grid>
@@ -561,4 +571,4 @@
 
         </TabControl>
     </Grid>
-</Window> 
+</Window>
