@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using BankApp_Models;
+using System.Text;
+using System.Windows;
 using System.Windows.Media;
 
 namespace BankApp_WPF
@@ -10,6 +12,20 @@ namespace BankApp_WPF
         public StartPagina()
         {
             InitializeComponent();
+
+
+            // 🔹 Database aanmaken bij opstarten
+            try
+            {
+                using (var context = new AppDbContext())
+                {
+                    // Database.EnsureCreated() wordt al aangeroepen in de constructor
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout bij aanmaken database: {ex.Message}");
+            }
         }
 
         // 🔹 Registratiepagina openen

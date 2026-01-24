@@ -151,19 +151,49 @@ namespace BankApp_WPF
         {
             using (var context = new AppDbContext())
             {
-                // Zoek gebruiker met dit e-mailadres
                 var gebruiker = context.Gebruikers
-                    .Include(g => g.Rol) // optioneel: rol mee laden
+                    .Include(g => g.Rol)
+                    .IgnoreQueryFilters()
                     .FirstOrDefault(g => g.Email.ToLower() == email.ToLower());
 
                 if (gebruiker == null)
+                {
+                    MessageBox.Show($"❌ Gebruiker niet gevonden:\n{email}",
+                        "Debug Login", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return false;
+                }
 
-                // 🔐 Hash het ingevoerde wachtwoord
+                if (!gebruiker.IsActief)
+                {
+                    MessageBox.Show(
+                        "Dit account is gedeactiveerd.\nNeem contact op met onze klantenservice als je het wilt heractiveren.",
+                        "Account gedeactiveerd",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return false;
+                }
+
                 var ingevoerdeHash = HashWachtwoord(password);
 
-                // Vergelijk hashes
-                return gebruiker.WachtwoordHash == ingevoerdeHash;
+                // 🧩 Debug info in popup (alleen tijdelijk!)
+                /*string debugInfo =
+                    $"=== LOGIN DEBUG ===\n" +
+                    $"Email: {email}\n\n" +
+                    $"Wachtwoord: {password}\n\n" +
+                    $"Ingevoerde hash:\n{ingevoerdeHash}\n\n" +
+                    $"Database hash:\n{gebruiker.WachtwoordHash}\n\n" +
+                    $"Hash match? {(ingevoerdeHash == gebruiker.WachtwoordHash)}";
+
+                MessageBox.Show(debugInfo, "Login Debug Info", MessageBoxButton.OK, MessageBoxImage.Information);*/
+
+                if (gebruiker.WachtwoordHash == ingevoerdeHash)
+                {
+                    //Zet de ingelogde gebruiker in de sessie
+                    UserSession.IngelogdeGebruiker = gebruiker;
+                    return true;
+                }
+
+                return false;
             }
         }
 

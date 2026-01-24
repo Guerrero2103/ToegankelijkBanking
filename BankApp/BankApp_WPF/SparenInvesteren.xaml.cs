@@ -148,8 +148,15 @@ public partial class SparenInvesteren : Window
     private void GaTerugNaarHoofdPagina()
     {
         AnnounceMessage("Terug naar hoofdpagina");
+
+        // Open de HoofdPagina
+        HoofdPagina hoofdPagina = new HoofdPagina();
+        hoofdPagina.Show();
+
+        // Sluit dit venster
         this.Close();
     }
+
 
     private void AnnounceMessage(string message)
     {

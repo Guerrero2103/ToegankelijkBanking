@@ -1,66 +1,219 @@
-﻿using System.Windows;
+﻿using BankApp_Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Windows;
 
 namespace BankApp_WPF
 {
     public partial class ProfilePage : Window
     {
+        private Gebruiker? _gebruiker;
+
         public ProfilePage()
         {
             InitializeComponent();
+            Loaded += ProfilePage_Loaded;
         }
 
-        // Terug knop - sluit het venster
+        private void ProfilePage_Loaded(object sender, RoutedEventArgs e)
+        {
+            // ✅ Controleer of er iemand is ingelogd
+            if (UserSession.IngelogdeGebruiker == null)
+            {
+                MessageBox.Show("Geen gebruiker actief. Log eerst in.", "Fout", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Close();
+                return;
+            }
+
+            _gebruiker = UserSession.IngelogdeGebruiker;
+
+            // 🔄 Vul alle velden met de huidige gegevens
+            EmailTextBox.Text = _gebruiker.Email;
+            PhoneTextBox.Text = _gebruiker.Telefoonnummer ?? "";
+
+            using (var context = new AppDbContext())
+            {
+                var gebruikerMetRekeningen = context.Gebruikers
+                    .Include(g => g.Rekeningen)
+                    .FirstOrDefault(g => g.Id == _gebruiker.Id);
+
+                if (gebruikerMetRekeningen?.Rekeningen != null && gebruikerMetRekeningen.Rekeningen.Any())
+                {
+                    IbanTextBox.Text = gebruikerMetRekeningen.Rekeningen.First().Iban;
+                }
+                else
+                {
+                    IbanTextBox.Text = "Geen rekening gevonden";
+                }
+            }
+
+            BirthdatePicker.SelectedDate = _gebruiker.Geboortedatum;
+            StraatTextBox.Text = _gebruiker.Straatnaam ?? "";
+            HuisnummerTextBox.Text = _gebruiker.Huisnummer ?? "";
+            BusTextBox.Text = _gebruiker.Bus ?? "";
+            PostcodeTextBox.Text = _gebruiker.Postcode ?? "";
+            GemeenteTextBox.Text = _gebruiker.Gemeente ?? "";
+
+        }
+
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            HoofdPagina hoofd = new HoofdPagina();
+            hoofd.Show();
+            Close();
         }
 
-        // Voice toggle knop
         private void VoiceToggleButton_Click(object sender, RoutedEventArgs e)
         {
-            // Toggle voice functionaliteit
             if (VoiceToggleButton.Content.ToString() == "🔊")
             {
                 VoiceToggleButton.Content = "🔇";
-                MessageBox.Show("Spraak feedback uitgeschakeld", "Voice", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Spraak feedback uitgeschakeld", "Voice");
             }
             else
             {
                 VoiceToggleButton.Content = "🔊";
-                MessageBox.Show("Spraak feedback ingeschakeld", "Voice", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Spraak feedback ingeschakeld", "Voice");
             }
         }
 
-        // Opslaan knop
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            // Validatie: Check of wachtwoorden overeenkomen
-            if (!string.IsNullOrEmpty(PasswordBox.Password) &&
-                PasswordBox.Password != ConfirmPasswordBox.Password)
+            if (_gebruiker == null)
             {
-                MessageBox.Show("Wachtwoorden komen niet overeen!", "Fout", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Geen actieve gebruiker gevonden.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            // Profiel opslaan
-            MessageBox.Show("Profiel succesvol bijgewerkt!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        // Verwijder account knop
-        private void DeleteButton_Click(object sender, RoutedEventArgs e)
-        {
-            var result = MessageBox.Show(
-                "Weet u zeker dat u uw profiel wilt verwijderen?\n\nDeze actie kan niet ongedaan gemaakt worden!",
-                "Waarschuwing",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning
-            );
-
-            if (result == MessageBoxResult.Yes)
+            try
             {
-                MessageBox.Show("Account succesvol verwijderd", "Verwijderd", MessageBoxButton.OK, MessageBoxImage.Information);
-                this.Close();
+                using (var context = new AppDbContext())
+                {
+                    var gebruikerInDb = context.Gebruikers.FirstOrDefault(g => g.Id == _gebruiker.Id);
+
+                    if (gebruikerInDb == null)
+                    {
+                        MessageBox.Show("Gebruiker niet gevonden in de database.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // ✅ Validatie
+                    if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
+                    {
+                        MessageBox.Show("E-mail mag niet leeg zijn.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    if (!DateTime.TryParse(BirthdatePicker.Text, out DateTime geboortedatum))
+                    {
+                        MessageBox.Show("Ongeldige geboortedatum.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    // ✅ Wachtwoordoptie (optioneel aanpassen)
+                    if (!string.IsNullOrWhiteSpace(PasswordBox.Password))
+                    {
+                        if (PasswordBox.Password != ConfirmPasswordBox.Password)
+                        {
+                            MessageBox.Show("De wachtwoorden komen niet overeen.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+
+                        gebruikerInDb.WachtwoordHash = HashWachtwoord(PasswordBox.Password);
+                    }
+
+
+                    // 📝 Update velden
+                    gebruikerInDb.Email = EmailTextBox.Text.Trim();
+                    gebruikerInDb.Telefoonnummer = PhoneTextBox.Text.Trim();
+                    gebruikerInDb.Geboortedatum = geboortedatum;
+                    gebruikerInDb.Straatnaam = StraatTextBox.Text.Trim();
+                    gebruikerInDb.Huisnummer = HuisnummerTextBox.Text.Trim();
+                    gebruikerInDb.Bus = string.IsNullOrWhiteSpace(BusTextBox.Text) ? null : BusTextBox.Text.Trim();
+                    gebruikerInDb.Postcode = PostcodeTextBox.Text.Trim();
+                    gebruikerInDb.Gemeente = GemeenteTextBox.Text.Trim();
+
+                    // 💾 Opslaan in DB
+                    context.SaveChanges();
+
+                    // 🔄 Bijwerken in UserSession
+                    UserSession.IngelogdeGebruiker = gebruikerInDb;
+                    _gebruiker = gebruikerInDb;
+
+                    MessageBox.Show("Gegevens succesvol opgeslagen!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Er is een fout opgetreden bij het opslaan: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+
+
+        // 🚫 DeleteButton: voorlopig geen functionaliteit
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_gebruiker == null)
+            {
+                MessageBox.Show("Geen actieve gebruiker gevonden.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var bevestiging = MessageBox.Show(
+                "Weet je zeker dat je je profiel wilt verwijderen?\n" +
+                "Je account wordt gedeactiveerd, maar je gegevens blijven bewaard voor administratie.",
+                "Bevestig verwijdering",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (bevestiging != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                using (var context = new AppDbContext())
+                {
+                    var gebruikerInDb = context.Gebruikers.FirstOrDefault(g => g.Id == _gebruiker.Id);
+
+                    if (gebruikerInDb == null)
+                    {
+                        MessageBox.Show("Gebruiker niet gevonden in database.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // ⚙️ Soft delete
+                    gebruikerInDb.IsActief = false;
+                    context.SaveChanges();
+                }
+
+                // 🧹 Clear sessie
+                UserSession.IngelogdeGebruiker = null;
+
+                MessageBox.Show("Je account is gedeactiveerd. Bedankt om onze bank te gebruiken!", "Account gedeactiveerd", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // 🔄 Terug naar loginpagina
+                LoginPagina login = new LoginPagina();
+                login.Show();
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Er is een fout opgetreden bij het verwijderen: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+        private string HashWachtwoord(string wachtwoord)
+        {
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(wachtwoord);
+                byte[] hash = sha256.ComputeHash(bytes);
+                return Convert.ToBase64String(hash);
+            }
+        }
+
     }
 }
